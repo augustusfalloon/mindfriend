@@ -1,0 +1,1 @@
+// App.js: userId, bundleId, dailyUsage: [ { date, duration } ]

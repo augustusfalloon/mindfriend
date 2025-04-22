@@ -1,0 +1,1 @@
+// maybe MongoDB mongoose schemas for User.js: name, email, passwordHash, etc.
