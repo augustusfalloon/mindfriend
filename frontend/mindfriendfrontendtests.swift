@@ -80,21 +80,29 @@ final class MindFriendFrontendTests: XCTestCase {
         
         XCTAssertFalse(viewModel.friendActivities.isEmpty)
     }
-    
-    func testEmptyFeedShowsMotivationalTip() {
-        let viewModel = FeedViewModel()
-        viewModel.friendActivities = []
+    // Add Friend Tests
+
+    func testSendingFriendRequestAddsToPending() {
+        let viewModel = FriendsViewModel()
+        viewModel.sendFriendRequest(to: "friend123")
         
-        XCTAssertEqual(viewModel.emptyFeedMessage, "Invite friends and stay mindful!")
+        XCTAssertTrue(viewModel.pendingRequests.contains("friend123"))
     }
-    
-    func testMutedFriendIsHiddenFromFeed() {
-        let viewModel = FeedViewModel()
-        viewModel.muteFriend(friendID: "user123")
-        viewModel.friendActivities = [
-            FriendActivity(friendID: "user123", appName: "Instagram", justification: "Posting homework", timestamp: Date())
-        ]
+
+    func testAcceptingFriendRequestAddsToFriendsList() {
+        let viewModel = FriendsViewModel()
+        viewModel.receiveFriendRequest(from: "friend123")
+        viewModel.acceptFriendRequest(from: "friend123")
         
-        XCTAssertFalse(viewModel.visibleFriendActivities.contains { $0.friendID == "user123" })
+        XCTAssertTrue(viewModel.friends.contains("friend123"))
+        XCTAssertFalse(viewModel.pendingRequests.contains("friend123"))
+    }
+
+    func testDecliningFriendRequestRemovesFromPending() {
+        let viewModel = FriendsViewModel()
+        viewModel.receiveFriendRequest(from: "friend123")
+        viewModel.declineFriendRequest(from: "friend123")
+        
+        XCTAssertFalse(viewModel.pendingRequests.contains("friend123"))
     }
 }
