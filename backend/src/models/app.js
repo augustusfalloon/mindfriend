@@ -1,1 +1,1 @@
-// App.js: userId, bundleId, dailyUsage: [ { date, duration } ]
+// App.js: userId, bundleId, dailyUsage: time before warning
