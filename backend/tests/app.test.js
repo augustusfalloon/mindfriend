@@ -1,104 +1,69 @@
-// tests/mindfriend.unit.test.js
+// tests/app.test.js
+const App = require('../src/models/app'); // or './src/models/App' depending on your filename
 
-const { LoginViewModel } = require('../src/viewModels/LoginViewModel');
-const { SettingsViewModel } = require('../src/viewModels/SettingsViewModel');
-const { RestrictedAppAccessViewModel } = require('../src/viewModels/RestrictedAppAccessViewModel');
-const { FeedViewModel, FriendActivity } = require('../src/viewModels/FeedViewModel');
-const { FriendsViewModel } = require('../src/viewModels/FriendsViewModel');
+describe('App Class', () => {
+  describe('Initialization & property‐setting', () => {
+    test('constructs with valid userId, bundleId & dailyUsage', () => {
+      const app = new App({ userId: 'u123', bundleId: 'com.foo', dailyUsage: 60 });
+      expect(app.userId).toBe('u123');
+      expect(app.bundleId).toBe('com.foo');
+      expect(app.dailyUsage).toBe(60);
+    });
 
-describe('Login Screen Tests', () => {
-  test('login button disabled during loading', () => {
-    const vm = new LoginViewModel();
-    vm.email = 'test@example.com';
-    vm.password = 'password';
-    vm.isLoading = true;
-    expect(vm.isButtonDisabled).toBe(true);
+    test('throws if dailyUsage is negative', () => {
+      expect(
+        () => new App({ userId: 'u1', bundleId: 'com.foo', dailyUsage: -10 })
+      ).toThrow();
+    });
+
+    test('throws if any field is missing or wrong type', () => {
+      expect(() => new App({ bundleId: 'com.foo', dailyUsage: 10 })).toThrow();
+      expect(() => new App({ userId: 'u1', dailyUsage: 10 })).toThrow();
+      expect(() => new App({ userId: 'u1', bundleId: 'com.foo', dailyUsage: '60' })).toThrow();
+    });
   });
 
-  test('error appears on failed login', () => {
-    const vm = new LoginViewModel();
-    vm.loginError = 'Invalid credentials';
-    expect(vm.loginError).toBe('Invalid credentials');
+  describe('Remaining‐time calculation', () => {
+    let app;
+    beforeAll(() => {
+      app = new App({ userId: 'u', bundleId: 'b', dailyUsage: 100 });
+    });
+
+    test('remainingTime = dailyUsage − used', () => {
+      expect(app.getRemaining(30)).toBe(70);
+      expect(app.getRemaining(0)).toBe(100);
+    });
+
+    test('remainingTime never negative', () => {
+      expect(app.getRemaining(150)).toBe(0);
+    });
   });
 
-  test('successful login navigates to dashboard', () => {
-    const vm = new LoginViewModel();
-    vm.isLoggedIn = true;
-    expect(vm.isLoggedIn).toBe(true);
-  });
-});
+  describe('Warning‐trigger logic', () => {
+    let app;
+    beforeAll(() => {
+      app = new App({ userId: 'u', bundleId: 'b', dailyUsage: 50 });
+    });
 
-describe('Settings Screen Tests', () => {
-  test('adding restricted app', () => {
-    const vm = new SettingsViewModel();
-    vm.addRestrictedApp('com.instagram.ios', 60);
-    expect(vm.restrictedApps.length).toBe(1);
-    expect(vm.restrictedApps[0]).toEqual({ appID: 'com.instagram.ios', waitTime: 60 });
-  });
+    test('hasExceeded returns false if used < dailyUsage', () => {
+      expect(app.hasExceeded(49)).toBe(false);
+    });
 
-  test('deleting restricted app', () => {
-    const vm = new SettingsViewModel();
-    vm.addRestrictedApp('com.instagram.ios', 60);
-    vm.deleteRestrictedApp('com.instagram.ios');
-    expect(vm.restrictedApps).toHaveLength(0);
-  });
-});
-
-describe('Restricted App Blocking Screen Tests', () => {
-  test('accessing restricted app triggers overlay', () => {
-    const vm = new RestrictedAppAccessViewModel();
-    vm.attemptAccess('com.tiktok.ios');
-    expect(vm.isOverlayVisible).toBe(true);
+    test('hasExceeded returns true if used ≥ dailyUsage', () => {
+      expect(app.hasExceeded(50)).toBe(true);
+      expect(app.hasExceeded(100)).toBe(true);
+    });
   });
 
-  test('wait option starts timer', () => {
-    const vm = new RestrictedAppAccessViewModel();
-    // assume default waitTime is 60
-    vm.selectWaitOption();
-    expect(vm.remainingWaitTime).toBe(60);
-  });
-
-  test('reason entry allows access', () => {
-    const vm = new RestrictedAppAccessViewModel();
-    vm.enterReason('Looking up a recipe');
-    expect(vm.isAccessGranted).toBe(true);
-  });
-});
-
-describe('Friend Activity Feed Tests', () => {
-  test('friend feed populates with activity', () => {
-    const vm = new FeedViewModel();
-    vm.friendActivities = [
-      new FriendActivity({
-        friendID: 'user123',
-        appName: 'Instagram',
-        justification: 'Posting homework',
-        timestamp: new Date()
-      })
-    ];
-    expect(vm.friendActivities.length).toBeGreaterThan(0);
-  });
-});
-
-describe('Add Friend Tests', () => {
-  test('sending friend request adds to pending', () => {
-    const vm = new FriendsViewModel();
-    vm.sendFriendRequest('friend123');
-    expect(vm.pendingRequests).toContain('friend123');
-  });
-
-  test('accepting friend request adds to friends list', () => {
-    const vm = new FriendsViewModel();
-    vm.receiveFriendRequest('friend123');
-    vm.acceptFriendRequest('friend123');
-    expect(vm.friends).toContain('friend123');
-    expect(vm.pendingRequests).not.toContain('friend123');
-  });
-
-  test('declining friend request removes from pending', () => {
-    const vm = new FriendsViewModel();
-    vm.receiveFriendRequest('friend123');
-    vm.declineFriendRequest('friend123');
-    expect(vm.pendingRequests).not.toContain('friend123');
+  describe('Serialization (toJSON)', () => {
+    test('toJSON includes only userId, bundleId, dailyUsage', () => {
+      const app = new App({ userId: 'u1', bundleId: 'com.bar', dailyUsage: 75 });
+      const obj = JSON.parse(JSON.stringify(app));
+      expect(obj).toEqual({
+        userId: 'u1',
+        bundleId: 'com.bar',
+        dailyUsage: 75
+      });
+    });
   });
 });
