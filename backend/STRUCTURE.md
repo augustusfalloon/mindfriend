@@ -21,17 +21,15 @@ mindfriend/
 │   │   │   ├── userController.js # Handles user-related logic: register/login, retrieve user profile info, update user preferences
 │   │   │   └── appController.js # Log a justification from user, fetch usage log for specific app
 │   │   ├── models/ # Define Mongoose schemas for simpler MongoDB collections?
-│   │   │   ├── User.js 
-│   │   │   └── App.js
-│   │   ├── routes/ # tell backend what to do when an HTTP request comes in from the frontend.
-│   │   │   ├── userRoutes.js
-│   │   │   └── appRoutes.js
+│   │   │   ├── user.js 
+│   │   │   └── app.js
 │   │   ├── services/
-│   │   │   └── dbService.js    # potentially db functions to save new app log, get logs by user, save user preferences
+│   │   │   └── databaseService.js    # potentially db functions to save new app log, get logs by user, save user preferences
 │   │   └── index.js            # main entry point to handle the server-side stuff
-│   ├── config/
-│   │   └── db.js               # MongoDB connection setup
 │   ├── .env
+|   ├── tests/
+│   │   ├── app.js
+│   │   ├── user.js
 │   ├── package.json
 │   └── README.md
 │
