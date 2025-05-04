@@ -26,10 +26,9 @@ app.use('/api/apps', appRoutes);
 // connect to db
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mindfriend';
 
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+console.log('Attempting to connect to MongoDB at', MONGODB_URI);
+
+mongoose.connect(MONGODB_URI)
 .then(() => {
     console.log('Connected to MongoDB');
 

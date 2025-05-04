@@ -1,7 +1,7 @@
 // Handles endpoints for app usage (POST /usage, GET /usage/:id, etc.)
 
-
-const User = require('../models/User');
+const User = require('../models/user');
+const UsageLog = require('../models/UsageLog');
 const { createUser, restrictApp, updateRestriction, addFriend } = require('./userController');
 
 const signUp = async (email, password, name) => {
@@ -37,7 +37,10 @@ const signInOrSignUp = async (req, res) => {
       return res.status(200).json(user);
     }
   } catch (error) {
-    const statusCode = error.message === 'User already exists' || error.message === 'Invalid credentials' ? 400 : 500;
+    const statusCode =
+      error.message === 'User already exists' || error.message === 'Invalid credentials'
+        ? 400
+        : 500;
     return res.status(statusCode).json({ message: error.message });
   }
 };
@@ -75,12 +78,46 @@ const setRestrictedApps = async (userId, apps) => {
   return user;
 };
 
-// still need to work with app store permissions
+const uploadUsage = async (req, res) => {
+  try {
+    const { userID, bundleId, duration, timestamp } = req.body;
 
+    if (!userID || !bundleId || !duration || !timestamp) {
+      return res.status(400).json({ error: 'Missing required fields.' });
+    }
 
-// still need to do friend invites
+    const newLog = new UsageLog({
+      userID,
+      bundleId,
+      duration,
+      timestamp: new Date(timestamp),
+    });
 
-// need to have some sort of integration with screen time API
+    await newLog.save();
+    res.status(200).json({ message: 'Usage data saved successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
+const getUsageLogs = async (req, res) => {
+  try {
+    const { userID } = req.params;
+    const logs = await UsageLog.find({ userID }).sort({ timestamp: -1 });
+    res.status(200).json(logs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-module.exports = { signInOrSignUp, signUp, signIn };
+// ✅ Export everything here
+module.exports = {
+  signInOrSignUp,
+  signUp,
+  signIn,
+  setUsageHours,
+  setHighRiskTimeBlocks,
+  setRestrictedApps,
+  uploadUsage,
+  getUsageLogs
+};

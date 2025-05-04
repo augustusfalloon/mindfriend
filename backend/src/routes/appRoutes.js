@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const appController = require('../controllers/appController');
 
+console.log('appController.uploadUsage:', typeof appController.uploadUsage);
+
 // POST /api/apps/upload-usage → Upload screen time usage
 router.post('/upload-usage', appController.uploadUsage);
 
