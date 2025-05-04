@@ -10,6 +10,8 @@ router.post('/restrictions', saveAppRestrictions);
 router.get('/restrictions/:userId', getAppRestrictions);
 
 
+console.log('appController.uploadUsage:', typeof appController.uploadUsage);
+
 // POST /api/apps/upload-usage → Upload screen time usage
 router.post('/upload-usage', appController.uploadUsage);
 
