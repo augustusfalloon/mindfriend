@@ -1,6 +1,6 @@
 // Handles login, signup, user retrieval.
 
-const User = require('../models/User');
+const User = require('../models/user');
 
 // new user onboarding&signup
 exports.createUser = async (req, res) => {
