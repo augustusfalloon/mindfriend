@@ -1,0 +1,1 @@
+// maybe entry point of the server. Sets up Express app, middleware (like CORS, JSON parser), routes, and starts the server.
