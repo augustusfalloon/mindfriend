@@ -1,3 +1,10 @@
+//
+//  MindFriendTests.swift
+//  MindFriendTests
+//
+//  Created by Augustus Falloon on 5/1/25.
+//
+
 import XCTest
 import SwiftUI
 @testable import MindFriend
@@ -88,7 +95,7 @@ struct FriendActivity: Identifiable {
 }
 
 // MARK: - Tests
-final class MindFriendFrontendTests: XCTestCase {
+final class MindFriendTests: XCTestCase {
     
     // Login Screen Tests
     func testLoginButtonDisabledDuringLoading() {
