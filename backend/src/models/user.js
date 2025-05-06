@@ -20,15 +20,28 @@ const userSchema = new mongoose.Schema({
 
 // will add logic in next iteration
 userSchema.methods.restrictApp = function(appID) {
-    
+    const existingRestriction = this.restrictedApps.find(restriction => restriction.appID === appID);
+    if (!existingRestriction) {
+      this.restrictedApps.push({ appID, timerDuration: 0, timerRecurring: false });
+    }
+    return this.save();
 };
 
 userSchema.methods.updateRestriction = function(appID, time) {
-    
+    const restriction = this.restrictedApps.find(restriction => restriction.appID === appID);
+    if (restriction) {
+      restriction.timerDuration = time;
+    } else {
+      this.restrictedApps.push({ appID, timerDuration: time, timerRecurring: false });
+    }
+    return this.save();
 };
 
 userSchema.methods.addFriend = function(userID) {
-    
+    if (!this.friends.includes(userID)) {
+      this.friends.push(userID);
+    }
+    return this.save();
 };
 
 const User = mongoose.model('User', userSchema);

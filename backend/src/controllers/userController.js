@@ -52,7 +52,7 @@ exports.addFriend = async (req, res) => {
         const { userID, friendID } = req.body;
         const user = await User.findOne({ userID });
         if (!user) throw new Error('User not found.');
-
+  
         await user.addFriend(friendID);
         await user.save();
 
