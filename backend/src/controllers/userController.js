@@ -1,6 +1,6 @@
 // Handles login, signup, user retrieval.
 
-const User = require('../models/User');
+const User = require('../models/user');
 
 // new user onboarding&signup
 exports.createUser = async (req, res) => {
@@ -59,5 +59,19 @@ exports.addFriend = async (req, res) => {
         res.status(200).json({ message: 'Friend added successfully.' });
     } catch (error) {
         res.status(400).json({ error: error.message });
+    }
+};
+
+// get a user's profile by userID
+exports.getUserProfile = async (req, res) => {
+    try {
+        const { userID } = req.params;
+        const user = await User.findOne({ userID });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };

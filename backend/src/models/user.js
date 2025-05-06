@@ -13,7 +13,9 @@ const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     userID: { type: String, required: true, unique: true }, // UUID or Mongo ObjectId stored as a string?
     restrictedApps: [appRestrictionSchema],
-    friends: [{ type: String }] // list of userIDs (string references)
+    friends: [{ type: String }], // list of userIDs (string references)
+    usageHours: { type: Number, default: 0 }, // total usage hours
+    highRiskTimeBlocks: [{ start: Date, end: Date }], // list of time blocks
 });
 
 // will add logic in next iteration

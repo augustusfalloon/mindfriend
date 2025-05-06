@@ -7,9 +7,7 @@ async function connectToDatabase() {
     //returns a connection to database the MindFriendDB
   const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
   const client = new MongoClient(uri, {
-    serverApi: ServerApiVersion.v1,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    serverApi: ServerApiVersion.v1, // note removed some db things ( useNewUrlParser: true, useUnifiedTopology: true, )that were depreciated so npm could run.
   });
 
   try {
@@ -81,13 +79,3 @@ async function removeDocument(filter, collectionName) {
         return 0;
     }
 }
-
-
-
-
-
-
-
-
-
-
