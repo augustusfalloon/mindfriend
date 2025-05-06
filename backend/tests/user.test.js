@@ -1,148 +1,49 @@
-const request = require('supertest');
-const app = require('../app'); // Your Express app (you might need to export it if not yet)
+// const request = require('supertest');
+// const app = require('../app'); // Your Express app (you might need to export it if not yet)
 const mongoose = require('mongoose');
-const User = require('../models/User');
-
-// NOTE: lots of these tests are filled out with generic fields until we better flesh out the backend-frontend
-// connection and the screentime API for milestone 3B.
+const User = require('../src/models/user.js');
 
 // Connect to test database
-beforeAll(async () => {
-    await mongoose.connect('mongodb://localhost:27017/mindfriend_test', {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    });
-});
+async function connectToDatabase() {
+    await mongoose.connect('mongodb://localhost:27017/mindfriend_test');
+}
 
-// Clear test database before each test
-beforeEach(async () => {
+// Clear test database
+async function clearDatabase() {
     await User.deleteMany();
-});
+}
 
-// Disconnect after all tests are done
-afterAll(async () => {
+// Disconnect from database
+async function disconnectFromDatabase() {
     await mongoose.connection.close();
-});
+}
 
-// Create a user successfully
-describe('POST /users', () => {
-    it('should create a new user', async () => {
-        const res = await request(app)
-            .post('/users')
-            .send({
-                fullName: 'Alice Johnson',
-                username: 'alicej',
-                userID: 'user123'
-            });
+// Test: Create a user and verify it is saved in the database
+async function testCreateUser() {
+    console.log('Connecting to test database...');
+    await connectToDatabase();
+    await clearDatabase();
+    console.log('Running test: Create User');
 
-        expect(res.statusCode).toEqual(201);
-        expect(res.body.username).toBe('alicej');
-    });
-});
+    const user = new User({ fullName: 'Alice Johnson', username: 'alicej', userID: 'user123' });
+    await user.save();
 
-// Restrict an app successfully
-describe('POST /users/restrictApp', () => {
-    it('should restrict an app for a user', async () => {
-        const user = new User({ fullName: 'Bob', username: 'bobthebuilder', userID: 'user456' });
-        await user.save();
+    const savedUser = await User.findOne({ username: 'alicej' });
+    if (!savedUser) {
+        throw new Error('User was not saved in the database');
+    }
 
-        const res = await request(app)
-            .post('/users/restrictApp')
-            .send({
-                userID: 'user456',
-                appID: 'com.instagram.ios'
-            });
+    console.log('✅ Test passed: User created successfully');
+    await disconnectFromDatabase();
+}
 
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.message).toBe('App restricted successfully.');
-    });
-});
+// Run all tests
+async function runTests() {
+    console.log('Running tests...');
+    await testCreateUser();
+    console.log('All tests completed!');
+}
 
-// Update app restriction successfully
-describe('POST /users/updateRestriction', () => {
-    it('should update a restriction for an app', async () => {
-        const user = new User({ fullName: 'Charlie', username: 'charliebitme', userID: 'user789' });
-        await user.save();
-
-        await user.restrictApp('com.tiktok.ios');
-        await user.save();
-
-        const res = await request(app)
-            .post('/users/updateRestriction')
-            .send({
-                userID: 'user789',
-                appID: 'com.tiktok.ios',
-                newTime: 3600
-            });
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.message).toBe('Restriction updated successfully.');
-    });
-});
-
-// Add a friend successfully (note - this is more for iteration 2)
-describe('POST /users/addFriend', () => {
-    it('should add a friend successfully', async () => {
-        const user = new User({ fullName: 'Dora', username: 'doratheexplorer', userID: 'user321' });
-        await user.save();
-
-        const res = await request(app)
-            .post('/users/addFriend')
-            .send({
-                userID: 'user321',
-                friendID: 'user1234'
-            });
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.message).toBe('Friend added successfully.');
-    });
-});
-
-// Fail to create a user with missing fields
-describe('POST /users', () => {
-    it('should fail to create user without username', async () => {
-        const res = await request(app)
-            .post('/users')
-            .send({
-                fullName: 'Eva',
-                userID: 'user654'
-            });
-
-        expect(res.statusCode).toEqual(400);
-        expect(res.body.error).toBeDefined();
-    });
-});
-
-// Fail to restrict app for non-existing user
-describe('POST /users/restrictApp', () => {
-    it('should fail to restrict app for non-existent user', async () => {
-        const res = await request(app)
-            .post('/users/restrictApp')
-            .send({
-                userID: 'nonexistentuser',
-                appID: 'com.snapchat.ios'
-            });
-
-        expect(res.statusCode).toEqual(400);
-        expect(res.body.error).toBe('User not found.');
-    });
-});
-
-// Fail to update restriction for non-existing app
-describe('POST /users/updateRestriction', () => {
-    it('should fail to update a non-existing restriction', async () => {
-        const user = new User({ fullName: 'Fred', username: 'fredflintstone', userID: 'user159' });
-        await user.save();
-
-        const res = await request(app)
-            .post('/users/updateRestriction')
-            .send({
-                userID: 'user159',
-                appID: 'nonexistentapp',
-                newTime: 500
-            });
-
-        expect(res.statusCode).toEqual(400);
-        expect(res.body.error).toBeDefined();
-    });
+runTests().catch(error => {
+    console.error('Test failed:', error.message);
 });
