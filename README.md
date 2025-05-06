@@ -53,6 +53,9 @@ followed closely.
 2. Run `npm install` to download all relevant packages
 3. Start the server with `npm start`
 
+### Changed Backend Tests
+The testing scripts in both the app tests and user tests documents have changed slightly. This is only to reflect updated function implementation with the classes (i.e. we have a method that creates a new instance as opposed to the test doing so manually). Additionally, the tests in user tests look different because we wanted to test them more manually than relying on HTTP messaging before. So, to be clear, they test exactly the same function, it is just done at a lower level and more directly. 
+
 ### Backend Testing
 To run backend tests:
 1. From the backend folder enter `npm install` to download all relevant packages
