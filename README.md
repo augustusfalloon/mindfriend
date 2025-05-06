@@ -15,4 +15,4 @@ In order to run the backend tests
 Connection with the MongoDB database has been created and new documents for new apps and users are functional. Methods for each object can be found in their controllers as well as their schema. We also created test scripts. Finally an inital implementation of the routes for frontend to use as an API is underway. Full integration with the frontend is underway.
 
 # Responsibilities
-Ethan Yoon -- recordkeeping, database utils, test scripting
+Ethan Yoon -- database utils and config, test scripting, README
