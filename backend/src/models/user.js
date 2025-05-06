@@ -18,6 +18,18 @@ const userSchema = new mongoose.Schema({
     highRiskTimeBlocks: [{ start: Date, end: Date }], // list of time blocks
 });
 
+userSchema.statics.createNewUser = async function({ fullName, username, userID }) {
+  if (!fullName || !username || !userID) {
+    throw new Error('Missing required fields: fullName, username, or userID');
+  }
+  const existingUser = await this.findOne({ username });
+  if (existingUser) {
+    throw new Error('Username already exists');
+  }
+  const newUser = new this({ fullName, username, userID });
+  return newUser.save();
+};
+
 // will add logic in next iteration
 userSchema.methods.restrictApp = function(appID) {
     const existingRestriction = this.restrictedApps.find(restriction => restriction.appID === appID);

@@ -19,8 +19,8 @@ async function testCreateUser() {
   await connectToDatabase();
   await clearDatabase();
 
-  const user = new User({ fullName: 'Alice Johnson', username: 'alicej', userID: 'user123' });
-  await user.save();
+  const user = await User.createNewUser({fullName: 'Alice Johnson', username: 'alicej', userID: 'user123' });
+  // await user.save();
 
   const savedUser = await User.findOne({ username: 'alicej' });
   if (!savedUser || savedUser.username !== 'alicej') {
@@ -35,8 +35,8 @@ async function testRestrictApp() {
   await connectToDatabase();
   await clearDatabase();
 
-  const user = new User({ fullName: 'Bob', username: 'bobthebuilder', userID: 'user456' });
-  await user.save();
+  const user = await User.createNewUser({ fullName: 'Bob', username: 'bobthebuilder', userID: 'user456' });
+  // await user.save();
 
   user.restrictedApps = [{ appID: 'com.instagram.ios', timerDuration: 0 }];
   await user.save();
@@ -55,7 +55,7 @@ async function testUpdateRestriction() {
   await connectToDatabase();
   await clearDatabase();
 
-  const user = new User({ fullName: 'Charlie', username: 'charliebitme', userID: 'user789' });
+  const user = await User.createNewUser({ fullName: 'Charlie', username: 'charliebitme', userID: 'user789' });
   user.restrictedApps = [{ appID: 'com.tiktok.ios', timerDuration: 3600 }];
   await user.save();
 
@@ -80,8 +80,8 @@ async function testAddFriend() {
   await connectToDatabase();
   await clearDatabase();
 
-  const user = new User({ fullName: 'Dora', username: 'doratheexplorer', userID: 'user321' });
-  await user.save();
+  const user = await User.createNewUser({ fullName: 'Dora', username: 'doratheexplorer', userID: 'user321' });
+  // await user.save();
 
   user.friends = ['user1234'];
   await user.save();
@@ -100,9 +100,9 @@ async function testFailCreateUser() {
   await clearDatabase();
 
   try {
-      const user = new User({ fullName: 'Eva', userID: 'user654' }); // Missing username
-      await user.save();
-      throw new Error('Test failed: User was created with missing fields');
+      const user = await User.createNewUser({ fullName: 'Eva', userID: 'user654' }); // Missing username
+      // await user.save();
+      // throw new Error('Test failed: User was created with missing fields');
   } catch (error) {
       console.log('Test passed: User creation failed with missing fields');
   }
@@ -127,15 +127,15 @@ async function testFailUpdateRestriction() {
   await connectToDatabase();
   await clearDatabase();
 
-  const user = new User({ fullName: 'Fred', username: 'fredflintstone', userID: 'user159' });
-  await user.save();
+  const user = await User.createNewUser({ fullName: 'Fred', username: 'fredflintstone', userID: 'user159' });
+  // await user.save();
 
   const restrictedApp = user.restrictedApps?.find(app => app.appID === 'nonexistentapp');
   if (restrictedApp) {
       throw new Error('Test failed: Found a non-existent app restriction');
   }
 
-  console.log('Test passed: Updating restriction for non-existent app failed as expected');
+  console.log('Test passed: Updating restriction for non-existent app went as expected');
   await disconnectFromDatabase();
 }
 

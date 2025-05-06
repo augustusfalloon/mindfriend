@@ -4,6 +4,8 @@ const User = require('../models/user');
 const UsageLog = require('../models/UsageLog');
 const { createUser, restrictApp, updateRestriction, addFriend } = require('./userController');
 
+// need to rewrite to use the user method createnewuser
+
 const signUp = async (email, password, name) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
