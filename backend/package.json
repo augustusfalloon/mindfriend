@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "jest"
+    "tests": "node run-tests.js",
+    "userTest": "node tests/user.test.js",
+    "appTest": "node tests/app.test.js"
   },
   "keywords": [],
   "author": "",

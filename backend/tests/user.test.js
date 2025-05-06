@@ -1,7 +1,7 @@
 const request = require('supertest');
-const app = require('../app'); // Your Express app (you might need to export it if not yet)
+const app = require('../src/models/app'); // Your Express app (you might need to export it if not yet)
 const mongoose = require('mongoose');
-const User = require('../models/User');
+const User = require('../src/models/User');
 
 // NOTE: lots of these tests are filled out with generic fields until we better flesh out the backend-frontend
 // connection and the screentime API for milestone 3B.
