@@ -82,3 +82,65 @@ To run backend tests:
 - Joshua Enebo - functions in userController.js, appController.js, changes to the user and app classes, and wrote some tests in app.test.js and user.test.js
 - Luke Hermann - wrote backend tests (app.test.js, user.test.js), and helped write functions in appController, as well as looked into integration between front and backend with routing
 - Jake Zucker - wrote some backend tests for app.test.js, helped to work through initial phases of integration through use of XCode, contributed to design for appController.js 
+
+
+### Milestone 4.A
+## Backend
+# 1
+1. Get backend and frontend components fully integrated
+2. Implement the Screentime API
+3. Ammend any routes and models based on app metadata (i.e. identifies, codes, etc.)
+# 2
+1. Ethan and Jake - Write database tests to ensure that form submission creates, removes, or modifies documents
+2. Luke and Joshua - Implement integration between front and backend so that database gets updated
+# 3 
+1. When a user submits an app for restriction, attach that restrcition to the user profile
+2. When a user removes an app for restriction, dettach that restrction from the user profile
+3. When a user adds a friend, add them to their list of friends
+4. When a user removes a freind, remove them from the user's list of friends
+5. When a user creates an account, add the account as a user to the database
+6. When a user deletes an account, remove the account from the database
+7. Get a user's screentime restriction for a specific app from the database
+8. When a user goes over their alloted screentime, add flag to their restriction [set restriction as 0????]
+
+### Structure 
+This is a general first idea of how we can structure our project.
+
+mindfriend/
+├── frontend/                      # iOS App (Swift)
+│   ├── Models/
+│   │   ├── User.swift
+│   │   └── App.swift
+│   ├── Views/
+│   │   ├── User/
+│   │   └── App/
+│   ├── ViewModels/             # MVVM if we decide to use SwiftUI
+│   ├── Networking/
+│   │   └── APIService.swift
+│   ├── Resources/              # Potentially Assets, LaunchScreens, etc.
+│   ├── Utilities/
+│   └── AppDelegate.swift
+│
+├── backend/                     # Node.js Backend
+│   ├── src/
+│   │   ├── controllers/ # Handle request logic (business rules, data transformation, validation).
+│   │   │   ├── userController.js # Handles user-related logic: register/login, retrieve user profile info, update user preferences
+│   │   │   └── appController.js # Log a justification from user, fetch usage log for specific app
+│   │   ├── models/ # Define Mongoose schemas for simpler MongoDB collections?
+│   │   │   ├── user.js 
+│   │   │   └── app.js
+│   │   ├── services/
+│   │   │   └── databaseService.js    # potentially db functions to save new app log, get logs by user, save user preferences
+│   │   └── index.js            # main entry point to handle the server-side stuff
+│   ├── .env
+|   ├── tests/
+│   │   ├── app.js
+│   │   ├── user.js
+│   ├── package.json
+│   └── README.md
+│
+├── docs/                       # Architecture, API contracts, etc.
+│   └── api-spec.md
+│
+├── README.md
+└── .gitignore
