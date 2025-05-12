@@ -79,3 +79,6 @@ To run backend tests:
 
 ### Backend
 - Ethan Yoon - Database utils and config, test scripting, README
+- Joshua Enebo - functions in userController.js, appController.js, changes to the user and app classes, and wrote some tests in app.test.js and user.test.js
+- Luke Hermann - wrote backend tests (app.test.js, user.test.js), and helped write functions in appController, as well as looked into integration between front and backend with routing
+- Jake Zucker - wrote some backend tests for app.test.js, helped to work through initial phases of integration through use of XCode, contributed to design for appController.js 
