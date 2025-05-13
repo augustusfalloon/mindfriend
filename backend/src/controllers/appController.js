@@ -80,6 +80,14 @@ const setRestrictedApps = async (userId, apps) => {
   return user;
 };
 
+const getAppRestrictions = async (userId) => {
+    const user = await User.findbyId(userId);
+    if (!user) {
+        throw new Error("User not found");
+    }
+    return user.restrictedApps;
+};
+
 const uploadUsage = async (req, res) => {
   try {
     const { userID, bundleId, duration, timestamp } = req.body;
@@ -121,5 +129,6 @@ module.exports = {
   setHighRiskTimeBlocks,
   setRestrictedApps,
   uploadUsage,
-  getUsageLogs
+  getUsageLogs,
+  getAppRestrictions,
 };
