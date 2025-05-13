@@ -1,35 +1,52 @@
 // tests/app.test.js
 const assert = require('assert');
 const App = require('../src/models/app'); // adjust path as needed
+const {connectToDatabase, disconnectFromDatabase} = require("../src/services/databaseService");
 
 async function runTests() {
   console.log('Running App class tests…');
 
+  await disconnectFromDatabase();
+
+  await connectToDatabase();
+
+//   const result = await connectToDatabase();
+//   client = result.client
+
   // 1) Initialization & property‐setting
-  let app = await App.createApp({
-    userId: 'u123',
-    bundleId: 'com.foo',
-    dailyUsage: 60
-  });
+  let app = await App.createApp({userId: 'u123', bundleId: 'com.foo', dailyUsage: 60});
   assert.strictEqual(app.userId, 'u123');
   assert.strictEqual(app.bundleId, 'com.foo');
   assert.strictEqual(app.dailyUsage, 60);
 
-  assert.throws(
+
+  await assert.rejects(
     () => App.createApp({ userId: 'u123', bundleId: 'com.foo' }),
-    Error
+    {
+        name: 'Error',
+        message: 'All fields are required to create an app'
+    }
   );
-  assert.throws(
+  await assert.rejects(
     () => App.createApp({ bundleId: 'com.foo', dailyUsage: 10 }),
-    Error
+    {
+        name: 'Error',
+        message: 'All fields are required to create an app'
+    }
   );
-  assert.throws(
+  await assert.rejects(
     () => App.createApp({ userId: 'u1', dailyUsage: 10 }),
-    Error
+    {
+        name: 'Error',
+        message: 'All fields are required to create an app'
+    }
   );
-  assert.throws(
+  await assert.rejects(
     () => App.createApp({ userId: 'u1', bundleId: 'com.foo', dailyUsage: '60' }),
-    Error
+    {
+        name: 'Error',
+        message: 'Daily usage must be a number'
+    }
   );
 
   // 2) Remaining‐time calculation

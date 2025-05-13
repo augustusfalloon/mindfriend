@@ -9,11 +9,15 @@ const AppSchema = new mongoose.Schema({
   restricted: { type: Boolean, default: false }, // Whether the app is restricted
 });
 
-AppSchema.statics.createApp = async function (userId, bundleId, dailyUsage) {
-  if (!userId || !bundleId || !dailyUsage) {
+AppSchema.statics.createApp = async function (params) {
+    console.log('params: ', params);
+  if (!params.userId || !params.bundleId || !params.dailyUsage) {
     throw new Error('All fields are required to create an app');
   }
-  const app = new this({ userId, bundleId, dailyUsage });
+  if (typeof params.dailyUsage != 'number') {
+    throw new Error('Daily usage must be a number');
+  }
+  const app = new this({ userId: params.userId, bundleId: params.bundleId, dailyUsage: params.dailyUsage, restricted: false });
   return await app.save();
 };
 const App = mongoose.model('App', AppSchema);

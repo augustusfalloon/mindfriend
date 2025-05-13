@@ -1,24 +1,26 @@
 // MongoDB setup and utility functions (e.g., connecting DB, indexing collections).
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const mongoose = require('mongoose');
+
 require('dotenv').config();
 
 async function connectToDatabase() {
-    //returns a connection to database the MindFriendDB
-  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-  const client = new MongoClient(uri, {
-    serverApi: ServerApiVersion.v1, // note removed some db things ( useNewUrlParser: true, useUnifiedTopology: true, )that were depreciated so npm could run.
-  });
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/MindFriendDB';
 
-  try {
-    await client.connect();
-    console.log('Connected to MongoDB');
-    return client.db(process.env.MONGODB_DB);
-  } catch (error) {
-    console.error('Error connecting to MongoDB:', error);
-    throw error;
-  }
-}
+    try {
+        await mongoose.connect(uri);
+        console.log('✅ Connected to MongoDB with Mongoose');
+        return mongoose.connection;
+    } catch (error) {
+        console.error('❌ Mongoose connection error:', error);
+        throw error;
+    }
+};
+
+async function disconnectFromDatabase() {
+  await mongoose.disconnect();
+  console.log('🔌 Disconnected from MongoDB');
+};
 
 async function addDocument(document, collectionName) {
     //adds a document to a collection (i.e. table)
@@ -79,3 +81,8 @@ async function removeDocument(filter, collectionName) {
         return 0;
     }
 }
+
+module.exports = {
+    connectToDatabase,
+    disconnectFromDatabase,
+};
