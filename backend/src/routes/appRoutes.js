@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const appController = require('../controllers/appController');
-const { saveAppRestrictions, getAppRestrictions } = require('../controllers/appController');
+const { setRestrictedApps, getAppRestrictions} = require('../controllers/appController');
 
 // Route to save app restrictions
-router.post('/restrictions', saveAppRestrictions);
+router.post('/restrictions', setRestrictedApps);
 
 // Route to get app restrictions for a user
 router.get('/restrictions/:userId', getAppRestrictions);
