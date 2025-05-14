@@ -20,11 +20,11 @@ async function testCreateUser() {
   await clearDatabase();
 
   const user = await User.createNewUser({fullName: 'Alice Johnson', username: 'alicej', userID: 'user123' });
-  // await user.save();
+  await user.save();
 
   const savedUser = await User.findOne({ username: 'alicej' });
-  if (!savedUser || savedUser.username !== 'alicej') {
-      throw new Error('User was not saved in the database');
+  if (!savedUser || savedUser.fullName !== 'Alice Johnson' || savedUser.userID !== 'user123') {
+      throw new Error('User was not saved in the database with correct fields');
   }
 
   console.log('Test passed: User created successfully');
@@ -45,6 +45,10 @@ async function testRestrictApp() {
   const restrictedApp = updatedUser.restrictedApps.find(app => app.appID === 'com.instagram.ios');
   if (!restrictedApp) {
       throw new Error('App was not restricted successfully');
+  }
+  const nonExistentApp = user.restrictedApps.find(app => app.appID === 'nonexistentapp');
+  if (nonExistentApp) {
+      throw new Error('Non-existent app should not be found');
   }
 
   console.log('Test passed: App restricted successfully');

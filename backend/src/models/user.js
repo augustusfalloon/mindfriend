@@ -32,6 +32,9 @@ userSchema.statics.createNewUser = async function({ fullName, username, userID }
 
 // will add logic in next iteration
 userSchema.methods.restrictApp = function(appID) {
+    if (!appID || typeof appID !== 'string') {
+        throw new Error('Invalid appID');
+    }
     const existingRestriction = this.restrictedApps.find(restriction => restriction.appID === appID);
     if (!existingRestriction) {
       this.restrictedApps.push({ appID, timerDuration: 0, timerRecurring: false });
@@ -40,6 +43,9 @@ userSchema.methods.restrictApp = function(appID) {
 };
 
 userSchema.methods.updateRestriction = function(appID, time) {
+    if (!appID || typeof appID !== 'string') {
+        throw new Error('Invalid appID');
+    }
     const restriction = this.restrictedApps.find(restriction => restriction.appID === appID);
     if (restriction) {
       restriction.timerDuration = time;
@@ -50,6 +56,9 @@ userSchema.methods.updateRestriction = function(appID, time) {
 };
 
 userSchema.methods.addFriend = function(userID) {
+    if (!userID || typeof userID !== 'string') {
+        throw new Error('Invalid userID');
+    }
     if (!this.friends.includes(userID)) {
       this.friends.push(userID);
     }
