@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     username: { type: String, required: true, unique: true },
     userID: { type: String, required: true, unique: true }, // UUID or Mongo ObjectId stored as a string?
+    passwordHash: { type: String, required: true },  // <-- Make sure this field exists
     restrictedApps: [appRestrictionSchema],
     friends: [{ type: String }], // list of userIDs (string references)
     usageHours: { type: Number, default: 0 }, // total usage hours

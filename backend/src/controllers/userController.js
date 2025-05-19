@@ -10,11 +10,13 @@ exports.createUser = async (req, res) => {
         if (!fullName || !username || !userID || !password) {
             throw new Error('Missing required fields');
         }
+        
         // check for duplicate user
         const existingUser = await User.findOne({ username });
         if (existingUser) {
             throw new Error('Username already exists');
         }
+        
         // hash the password
         const passwordHash = await bcrypt.hash(password, 10);
         const newUser = new User({ fullName, username, userID, passwordHash, restrictedApps: [], friends: [] });
