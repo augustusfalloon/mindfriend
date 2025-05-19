@@ -4,6 +4,7 @@ struct LoginView: View {
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var isLoggedIn: Bool = false
+    @State private var showingSignUp: Bool = false
     
     var body: some View {
         NavigationView {
@@ -39,12 +40,23 @@ struct LoginView: View {
                             .cornerRadius(10)
                     }
                     .padding(.horizontal)
+                    
+                    Button(action: {
+                        showingSignUp = true
+                    }) {
+                        Text("Don't have an account? Sign Up")
+                            .foregroundColor(.blue)
+                    }
+                    .padding(.top, 10)
                 }
             }
             .padding()
             .navigationBarHidden(true)
             .fullScreenCover(isPresented: $isLoggedIn) {
                 MainTabView()
+            }
+            .sheet(isPresented: $showingSignUp) {
+                SignUpView()
             }
         }
     }
