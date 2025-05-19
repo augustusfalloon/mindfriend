@@ -23,10 +23,18 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXBuildFile section */
+		11C3EFCE2DC400770076F6B0 /* MindFriend.app */ = {isa = PBXBuildFile; fileRef = 11C3EFCE2DC400770076F6B0 /* MindFriend.app */; };
+		11C3EFDB2DC400790076F6B0 /* MindFriendTests.xctest */ = {isa = PBXBuildFile; fileRef = 11C3EFDB2DC400790076F6B0 /* MindFriendTests.xctest */; };
+		11C3EFE52DC400790076F6B0 /* MindFriendUITests.xctest */ = {isa = PBXBuildFile; fileRef = 11C3EFE52DC400790076F6B0 /* MindFriendUITests.xctest */; };
+		NEW_ENTITLEMENTS_FILE_REF /* MindFriend.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = NEW_ENTITLEMENTS_FILE_REF /* MindFriend.entitlements */; },
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		11C3EFCE2DC400770076F6B0 /* MindFriend.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MindFriend.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		11C3EFDB2DC400790076F6B0 /* MindFriendTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MindFriendTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		11C3EFE52DC400790076F6B0 /* MindFriendUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MindFriendUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		NEW_ENTITLEMENTS_FILE_REF /* MindFriend.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MindFriend.entitlements; sourceTree = "<group>"; },
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -34,17 +42,17 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = MindFriend;
 			sourceTree = "<group>";
-		};
+		},
 		11C3EFDE2DC400790076F6B0 /* MindFriendTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = MindFriendTests;
 			sourceTree = "<group>";
-		};
+		},
 		11C3EFE82DC400790076F6B0 /* MindFriendUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = MindFriendUITests;
 			sourceTree = "<group>";
-		};
+		},
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,7 +147,7 @@
 			productName = MindFriendTests;
 			productReference = 11C3EFDB2DC400790076F6B0 /* MindFriendTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
-		};
+		},
 		11C3EFE42DC400790076F6B0 /* MindFriendUITests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 11C3EFF52DC400790076F6B0 /* Build configuration list for PBXNativeTarget "MindFriendUITests" */;
@@ -162,7 +170,7 @@
 			productName = MindFriendUITests;
 			productReference = 11C3EFE52DC400790076F6B0 /* MindFriendUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
-		};
+		},
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -204,7 +212,7 @@
 				11C3EFDA2DC400790076F6B0 /* MindFriendTests */,
 				11C3EFE42DC400790076F6B0 /* MindFriendUITests */,
 			);
-		};
+		},
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -214,21 +222,21 @@
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-		};
+		},
 		11C3EFD92DC400790076F6B0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-		};
+		},
 		11C3EFE32DC400790076F6B0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-		};
+		},
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -238,21 +246,21 @@
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-		};
+		},
 		11C3EFD72DC400790076F6B0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-		};
+		},
 		11C3EFE12DC400790076F6B0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-		};
+		},
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -260,12 +268,12 @@
 			isa = PBXTargetDependency;
 			target = 11C3EFCD2DC400770076F6B0 /* MindFriend */;
 			targetProxy = 11C3EFDC2DC400790076F6B0 /* PBXContainerItemProxy */;
-		};
+		},
 		11C3EFE72DC400790076F6B0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 11C3EFCD2DC400770076F6B0 /* MindFriend */;
 			targetProxy = 11C3EFE62DC400790076F6B0 /* PBXContainerItemProxy */;
-		};
+		},
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -332,7 +340,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
-		};
+		},
 		11C3EFEE2DC400790076F6B0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -389,17 +397,27 @@
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
-		};
+		},
 		11C3EFF02DC400790076F6B0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MindFriend/MindFriend.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = W573YM6JBK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MindFriend;
+				INFOPLIST_KEY_CFBundleIdentifier = com.example.MindFriend;
+				INFOPLIST_KEY_CFBundleName = MindFriend;
+				INFOPLIST_KEY_CFBundleShortVersionString = 1.0;
+				INFOPLIST_KEY_CFBundleVersion = 1;
+				INFOPLIST_KEY_LSApplicationQueriesSchemes = "instagram fb twitter tiktok youtube snapchat whatsapp reddit pinterest linkedin spotify netflix discord telegram tumblr";
+				INFOPLIST_KEY_NSFamilyControlsUsageDescription = "We need access to manage app restrictions for your digital wellbeing.";
+				INFOPLIST_KEY_NSDeviceActivityMonitoringUsageDescription = "We need to monitor app usage to help you maintain healthy digital habits.";
+				INFOPLIST_KEY_NSManagedSettingsUsageDescription = "We need to manage app restrictions to help you stay focused and mindful of your screen time.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -418,7 +436,7 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
-		};
+		},
 		11C3EFF12DC400790076F6B0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -429,11 +447,20 @@
 				DEVELOPMENT_TEAM = W573YM6JBK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MindFriend;
+				INFOPLIST_KEY_CFBundleIdentifier = com.example.MindFriend;
+				INFOPLIST_KEY_CFBundleName = MindFriend;
+				INFOPLIST_KEY_CFBundleShortVersionString = 1.0;
+				INFOPLIST_KEY_CFBundleVersion = 1;
+				INFOPLIST_KEY_LSApplicationQueriesSchemes = "instagram fb twitter tiktok youtube snapchat whatsapp reddit pinterest linkedin spotify netflix discord telegram tumblr";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_NSFamilyControlsUsageDescription = "We need access to manage app restrictions for your digital wellbeing.";
+				INFOPLIST_KEY_NSDeviceActivityMonitoringUsageDescription = "We need to monitor app usage to help you maintain healthy digital habits.";
+				INFOPLIST_KEY_NSManagedSettingsUsageDescription = "We need to manage app restrictions to help you stay focused and mindful of your screen time.";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -447,7 +474,7 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
-		};
+		},
 		11C3EFF32DC400790076F6B0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -466,7 +493,7 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MindFriend.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MindFriend";
 			};
 			name = Debug;
-		};
+		},
 		11C3EFF42DC400790076F6B0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -485,7 +512,7 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MindFriend.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MindFriend";
 			};
 			name = Release;
-		};
+		},
 		11C3EFF62DC400790076F6B0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -502,7 +529,7 @@
 				TEST_TARGET_NAME = MindFriend;
 			};
 			name = Debug;
-		};
+		},
 		11C3EFF72DC400790076F6B0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -519,7 +546,7 @@
 				TEST_TARGET_NAME = MindFriend;
 			};
 			name = Release;
-		};
+		},
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -558,7 +585,7 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
-		};
+		},
 /* End XCConfigurationList section */
 	};
 	rootObject = 11C3EFC62DC400770076F6B0 /* Project object */;

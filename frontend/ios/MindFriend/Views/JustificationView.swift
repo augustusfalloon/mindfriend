@@ -35,44 +35,43 @@ struct JustificationView: View {
                                     .stroke(Color.gray.opacity(0.2))
                             )
                         
-                        HStack(spacing: 16) {
-                            Button(action: {
-                                showingTimer = true
-                                startTimer()
-                            }) {
-                                Text("Wait 60s")
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
-                            }
-                            
-                            Button(action: {
-                                onJustificationSubmitted(justification)
-                                dismiss()
-                            }) {
-                                Text("Submit")
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(justification.isEmpty ? Color.gray : Color.green)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
-                            }
-                            .disabled(justification.isEmpty)
+                        Button(action: {
+                            showingTimer = true
+                            startTimer()
+                        }) {
+                            Text("Wait 60s")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
                         }
+                        
+                        Button(action: {
+                            onJustificationSubmitted(justification)
+                            dismiss()
+                        }) {
+                            Text("Submit")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(justification.isEmpty ? Color.gray : Color.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                        .disabled(justification.isEmpty)
                     }
                     .padding()
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+            .navigationBarItems(leading: Button(action: {
+                dismiss()
+            }) {
+                HStack {
+                    Image(systemName: "chevron.left")
+                    Text("Back")
                 }
-            }
+            })
         }
     }
     

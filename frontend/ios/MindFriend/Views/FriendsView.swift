@@ -117,13 +117,14 @@ struct AddFriendView: View {
             .onChange(of: searchText) { newValue in
                 viewModel.searchUsers(query: newValue)
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
+            .navigationBarItems(leading: Button(action: {
+                dismiss()
+            }) {
+                HStack {
+                    Image(systemName: "chevron.left")
+                    Text("Back")
                 }
-            }
+            })
         }
     }
 }

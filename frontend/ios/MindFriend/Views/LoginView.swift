@@ -1,9 +1,8 @@
 import SwiftUI
 
 struct LoginView: View {
-    @State private var username: String = ""
-    @State private var password: String = ""
-    @State private var isLoggedIn: Bool = false
+    @StateObject private var viewModel = LoginViewModel()
+    @State private var showingSignUp = false
     
     var body: some View {
         NavigationView {
@@ -19,34 +18,91 @@ struct LoginView: View {
                     .fontWeight(.bold)
                 
                 VStack(spacing: 15) {
-                    TextField("Username", text: $username)
+                    TextField("Username", text: $viewModel.username)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
+                        .autocapitalization(.none)
                     
-                    SecureField("Password", text: $password)
+                    SecureField("Password", text: $viewModel.password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
+                    
+                    if !viewModel.loginError.isEmpty {
+                        Text(viewModel.loginError)
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
                     
                     Button(action: {
-                        // For now, we'll just log in with any credentials
-                        isLoggedIn = true
+                        Task {
+                            await viewModel.login()
+                        }
                     }) {
-                        Text("Login")
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(10)
+                        if viewModel.isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Text("Login")
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(viewModel.isButtonDisabled ? Color.gray : Color.blue)
+                                .cornerRadius(10)
+                        }
                     }
-                    .padding(.horizontal)
+                    .disabled(viewModel.isButtonDisabled)
+                }
+                .padding(.horizontal)
+                
+                HStack {
+                    Text("Don't have an account?")
+                        .foregroundColor(.gray)
+                    Button("Sign Up") {
+                        showingSignUp = true
+                    }
+                    .foregroundColor(.blue)
                 }
             }
             .padding()
             .navigationBarHidden(true)
-            .fullScreenCover(isPresented: $isLoggedIn) {
+            .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
                 MainTabView()
             }
+            .sheet(isPresented: $showingSignUp) {
+                SignUpView()
+            }
         }
+    }
+}
+
+class LoginViewModel: ObservableObject {
+    @Published var username: String = ""
+    @Published var password: String = ""
+    @Published var isLoggedIn: Bool = false
+    @Published var isLoading: Bool = false
+    @Published var loginError: String = ""
+    
+    var isButtonDisabled: Bool {
+        isLoading || username.isEmpty || password.isEmpty
+    }
+    
+    @MainActor
+    func login() async {
+        guard !isButtonDisabled else { return }
+        
+        isLoading = true
+        loginError = ""
+        
+        do {
+            // TODO: Implement API call to login
+            // Simulate network delay
+            try await Task.sleep(nanoseconds: 1_000_000_000)
+            
+            // For now, just log in with any credentials
+            isLoggedIn = true
+        } catch {
+            loginError = "Failed to login. Please try again."
+        }
+        
+        isLoading = false
     }
 }
 
