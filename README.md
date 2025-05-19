@@ -103,6 +103,45 @@ To run backend tests:
 7. Get a user's screentime restriction for a specific app from the database
 8. When a user goes over their alloted screentime, add flag to their restriction [set restriction as 0????]
 
+##Frontend
+In this second development iteration, we are moving beyond the internal app logic and settings (which were largely completed in Iteration 1) to implement the core interaction mechanisms and social features that give MindFriend its value. These include:
+Accessing Restricted Apps:
+    Explore and implement ways to detect when a user attempts to open a restricted app during a high-risk time.
+    Trigger a blocking overlay with a countdown timer and/or justification prompt.
+
+Timer Implementation:
+Implement a 60-second wait period before users can enter a restricted app.
+Allow users to bypass the timer by submitting a justification.
+
+Justification Entry + Sharing:
+
+Store and timestamp user-submitted reasons for restricted app use.
+Post those reasons to a shared feed visible to connected friends.
+
+Friend Notifications:
+
+Notify friends in real-time when someone they follow opens a restricted app and submits a reason.
+Build a push notification system that links directly to the feed view.
+
+Friend System Implementation:
+
+
+Users can search for, add, and accept/reject friend requests.
+    Friends will form the user’s accountability circle, with feed visibility limited to those connections.
+
+
+What We Are Not Implementing in Iteration 2
+
+Full iOS-level enforcement/blocking via Device Management (MDM):
+ Due to iOS platform restrictions and the scope of this class project, we will not be implementing true app-blocking capabilities. Instead, we will simulate this via timely notifications, overlays, and user interactions.
+
+
+Gamification, analytics dashboards, and AI-based habit prediction:
+ These are stretch goals for future development but will not be tackled during this iteration due to complexity and prioritization of core use cases.
+
+
+
+
 ### Structure 
 This is a general first idea of how we can structure our project.
 
