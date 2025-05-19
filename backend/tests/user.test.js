@@ -1,23 +1,24 @@
 const mongoose = require('mongoose');
 const User = require('../src/models/user.js');
+const {connectToDatabase, disconnectFromDatabase} = require("../src/services/databaseService");
 
 
-async function connectToDatabase() {
-    await mongoose.connect('mongodb://localhost:27017/mindfriend_test');
-}
+// async function connectToDatabase() {
+//     await mongoose.connect('mongodb://localhost:27017/mindfriend_test');
+// }
 
 async function clearDatabase() {
     await User.deleteMany();
 }
 
-async function disconnectFromDatabase() {
-    await mongoose.connection.close();
-}
+// async function disconnectFromDatabase() {
+//     await mongoose.connection.close();
+// }
 
 
 async function testCreateUser() {
-  await connectToDatabase();
-  await clearDatabase();
+  // await connectToDatabase();
+  // await clearDatabase();
 
   const user = await User.createNewUser({fullName: 'Alice Johnson', username: 'alicej', userID: 'user123' });
   await user.save();
@@ -36,12 +37,12 @@ async function testCreateUser() {
 
 
   console.log('Test passed: User created successfully');
-  await disconnectFromDatabase();
+  // await disconnectFromDatabase();
 }
 
 async function testRestrictApp() {
-  await connectToDatabase();
-  await clearDatabase();
+  // await connectToDatabase();
+  // await clearDatabase();
 
   // Create a new user
   const user = await User.createNewUser({ fullName: 'Bob', username: 'bobthebuilder', userID: 'user456' });
@@ -67,12 +68,12 @@ async function testRestrictApp() {
   }
 
   console.log('Test passed: App restricted successfully');
-  await disconnectFromDatabase();
+  // await disconnectFromDatabase();
 }
 
 async function testUpdateRestriction() {
-    await connectToDatabase();
-    await clearDatabase();
+    // await connectToDatabase();
+    // await clearDatabase();
   
     // Create a new user
     const user = await User.createNewUser({ fullName: 'Charlie', username: 'charliebitme', userID: 'user789' });
@@ -103,12 +104,12 @@ async function testUpdateRestriction() {
     }
   
     console.log('Test passed: App restriction updated successfully');
-    await disconnectFromDatabase();
+    // await disconnectFromDatabase();
   }
   
   async function testAddFriend() {
-    await connectToDatabase();
-    await clearDatabase();
+    // await connectToDatabase();
+    // await clearDatabase();
   
     // Create a new user
     const user = await User.createNewUser({ fullName: 'Dora', username: 'doratheexplorer', userID: 'user321' });
@@ -143,12 +144,12 @@ async function testUpdateRestriction() {
     }
   
     console.log('Test passed: Friend added successfully');
-    await disconnectFromDatabase();
+    // await disconnectFromDatabase();
   }
 
 async function testFailCreateUser() {
-  await connectToDatabase();
-  await clearDatabase();
+  // await connectToDatabase();
+  // await clearDatabase();
 
   // Test missing username
   try {
@@ -175,12 +176,12 @@ async function testFailCreateUser() {
   }
 
   console.log('Test passed: User creation failed as expected for invalid inputs');
-  await disconnectFromDatabase();
+  // await disconnectFromDatabase();
 }
 
 async function testFailRestrictApp() {
-    await connectToDatabase();
-    await clearDatabase();
+    // await connectToDatabase();
+    // await clearDatabase();
   
     // Test restricting app for a non-existent user
     const user = await User.findOne({ userID: 'nonexistentuser' });
@@ -210,15 +211,15 @@ async function testFailRestrictApp() {
     }
   
     console.log('Test passed: Restricting app for non-existent user or invalid data failed as expected');
-    await disconnectFromDatabase();
+    // await disconnectFromDatabase();
   }
 
   async function testFailUpdateRestriction() {
-    await connectToDatabase();
-    await clearDatabase();
+    // await connectToDatabase();
+    // await clearDatabase();
   
     // Create a new user
-    const user = await User.createNewUser({ fullName: 'Fred', username: 'fredflintstone', userID: 'user159' });
+    const user = await User.createNewUser({ fullName: 'Fred23', username: 'fredflintstone23', userID: 'user165' });
   
     // Verify that a non-existent app restriction cannot be found
     const restrictedApp = user.restrictedApps?.find(app => app.appID === 'nonexistentapp');
@@ -258,10 +259,14 @@ async function testFailRestrictApp() {
     }
   
     console.log('Test passed: Updating restriction for non-existent app or invalid data failed as expected');
-    await disconnectFromDatabase();
+    // await disconnectFromDatabase();
   }
 
 async function runTests() {
+  console.log('Running User class tests…');
+  await disconnectFromDatabase();
+  await connectToDatabase();
+  await clearDatabase();
   await testCreateUser();
   await testRestrictApp();
   await testUpdateRestriction();
@@ -270,6 +275,7 @@ async function runTests() {
   await testFailRestrictApp();
   await testFailUpdateRestriction();
   console.log('All tests completed!');
+  await disconnectFromDatabase();
 }
 
 runTests().catch(error => {
