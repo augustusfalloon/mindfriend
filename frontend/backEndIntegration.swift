@@ -1,59 +1,97 @@
 import Foundation
 
-class BackendService {
-    static let shared = BackendService()
-    private let baseURL = "http://localhost:3000" // Replace with your backend URL
+// this is a sample screen time model, but we can change this based on the screen time api 
+struct ScreenTimeRecord: Codable {
+    let userId: String
+    let appId: String
+    let usage: Int
+    let date: String
+}
 
-    func saveRestrictions(userId: String, restrictedApps: [String], timeBlocks: [String], completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/save-restrictions") else { return }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let body: [String: Any] = [
-            "userId": userId,
-            "restrictedApps": restrictedApps,
-            "timeBlocks": timeBlocks
-        ]
-
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            completion(.success(()))
-        }.resume()
+// this will send the screen time data to the backend
+func sendScreenTime(record: ScreenTimeRecord, completion: @escaping (Result<ScreenTimeRecord, Error>) -> Void) {
+    guard let url = URL(string: "http://localhost:3000/api/apps/") else {
+        completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+        return
     }
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    do {
+        let jsonData = try JSONEncoder().encode(record)
+        request.httpBody = jsonData
+    } catch {
+        completion(.failure(error))
+        return
+    }
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            completion(.failure(error))
+            return
+        }
+        guard let data = data else {
+            completion(.failure(NSError(domain: "No data", code: 0)))
+            return
+        }
+        do {
+            let responseRecord = try JSONDecoder().decode(ScreenTimeRecord.self, from: data)
+            completion(.success(responseRecord))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+    task.resume()
+}
 
-    func getRestrictions(userId: String, completion: @escaping (Result<(restrictedApps: [String], timeBlocks: [String]), Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/get-restrictions/\(userId)") else { return }
+// this sends a GET request to get screen time data from the backend if its in the database
+func fetchScreenTime(userId: String, completion: @escaping (Result<[ScreenTimeRecord], Error>) -> Void) {
+    guard let url = URL(string: "http://localhost:3000/api/apps/\(userId)") else {
+        completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+        return
+    }
+    let request = URLRequest(url: url)
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            completion(.failure(error))
+            return
+        }
+        guard let data = data else {
+            completion(.failure(NSError(domain: "No data", code: 0)))
+            return
+        }
+        do {
+            let records = try JSONDecoder().decode([ScreenTimeRecord].self, from: data)
+            completion(.success(records))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+    task.resume()
+}
 
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
 
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No data", code: 0, userInfo: nil)))
-                return
-            }
+// here is a sample record to test with
+let record = ScreenTimeRecord(
+    userId: "user123",
+    appId: "com.example.app",
+    usage: 120,
+    date: ISO8601DateFormatter().string(from: Date())
+)
 
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let restrictedApps = json["restrictedApps"] as? [String],
-                   let timeBlocks = json["timeBlocks"] as? [String] {
-                    completion(.success((restrictedApps, timeBlocks)))
-                } else {
-                    completion(.failure(NSError(domain: "Invalid response", code: 0, userInfo: nil)))
-                }
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
+sendScreenTime(record: record) { result in
+    switch result {
+    case .success(let responseRecord):
+        print("Screen time sent: \(responseRecord)")
+    case .failure(let error):
+        print("Error sending screen time: \(error)")
     }
 }
+
+// fetchScreenTime(userId: "user123") { result in
+//     switch result {
+//     case .success(let records):
+//         print("Fetched screen time records: \(records)")
+//     case .failure(let error):
+//         print("Error fetching screen time: \(error)")
+//     }
+// }
