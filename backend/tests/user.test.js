@@ -27,6 +27,14 @@ async function testCreateUser() {
       throw new Error('User was not saved in the database with correct fields');
   }
 
+  try {
+    await User.createNewUser({ fullName: 'Alice Johnson', username: 'alicej', userID: 'user456' });
+    throw new Error('Test failed: Duplicate username was allowed');
+  } catch (error) {
+    console.log('Test passed: Duplicate username was not allowed');
+  }
+
+
   console.log('Test passed: User created successfully');
   await disconnectFromDatabase();
 }
