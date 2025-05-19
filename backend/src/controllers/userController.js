@@ -3,17 +3,27 @@
 const User = require('../models/user');
 
 // new user onboarding&signup
+const bcrypt = require('bcrypt');
 exports.createUser = async (req, res) => {
     try {
-        const { fullName, username, userID } = req.body;
-        const newUser = new User({ fullName, username, userID, restrictedApps: [], friends: [] });
+        const { fullName, username, userID, password } = req.body;
+        if (!fullName || !username || !userID || !password) {
+            throw new Error('Missing required fields');
+        }
+        // check for duplicate user
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            throw new Error('Username already exists');
+        }
+        // hash the password
+        const passwordHash = await bcrypt.hash(password, 10);
+        const newUser = new User({ fullName, username, userID, passwordHash, restrictedApps: [], friends: [] });
         await newUser.save();
         res.status(201).json(newUser);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
-
 // restrict an app for a user
 exports.restrictApp = async (req, res) => {
     try {
@@ -74,4 +84,39 @@ exports.getUserProfile = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+};
+
+//handle login
+
+const jwt = require('jsonwebtoken');
+
+exports.login = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Find the user by username
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Verify the provided password with the stored hash
+        const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+        if (!isPasswordValid) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Generate a JWT token
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        return res.status(200).json({ token, message: 'Login successful' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// cursory logout - should be handled on client side 
+exports.logout = async (req, res) => {
+    return res.status(200).json({ message: 'Logout successful' });
 };

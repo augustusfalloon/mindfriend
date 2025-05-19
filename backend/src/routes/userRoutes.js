@@ -17,4 +17,10 @@ router.post('/add-friend', userController.addFriend);
 // GET /api/users/:userID → Get user info (optional)
 router.get('/:userID', userController.getUserProfile);
 
+// POST /api/users/login → Login a user
+router.post('/login', userController.login);
+
+// POST /api/users/logout → Logout a user
+router.post('/logout', userController.logout);
+
 module.exports = router;

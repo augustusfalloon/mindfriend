@@ -1,0 +1,2 @@
+JWT_SECRET=72e992b987827c4f91e4fc56c888ac2f982a60d7cd69ee966387ceeda5eb8ab5
+MONGODB_URI=mongodb://localhost:27017/mindfriend
