@@ -28,53 +28,38 @@ struct MainTabView: View {
 
 struct RestrictedAppsView: View {
     @StateObject private var viewModel = RestrictedAppsViewModel()
-    @State private var showingJustification = false
-    @State private var selectedApp: String?
     
     var body: some View {
         NavigationView {
             List {
                 Section(header: Text("Restricted Apps")) {
                     ForEach(viewModel.restrictedApps) { app in
-                        AppRow(appName: app.name, icon: app.icon)
-                            .onTapGesture {
-                                selectedApp = app.name
-                                showingJustification = true
-                            }
+                        AppRow(app: app, viewModel: viewModel)
                     }
                 }
             }
             .navigationTitle("Restricted Apps")
-            .sheet(isPresented: $showingJustification) {
-                if let appName = selectedApp {
-                    JustificationView(
-                        appName: appName,
-                        onJustificationSubmitted: { justification in
-                            viewModel.logAppUsage(appName: appName, justification: justification)
-                        },
-                        onWaitSelected: {
-                            // Handle wait timer completion
-                        }
-                    )
-                }
-            }
         }
     }
 }
 
 struct AppRow: View {
-    let appName: String
-    let icon: String
+    let app: RestrictedApp
+    let viewModel: RestrictedAppsViewModel
     
     var body: some View {
         HStack {
-            Image(systemName: icon)
+            Image(systemName: app.icon)
                 .foregroundColor(.blue)
                 .frame(width: 30)
-            Text(appName)
+            Text(app.name)
             Spacer()
-            Image(systemName: "chevron.right")
-                .foregroundColor(.gray)
+            Toggle("", isOn: Binding(
+                get: { app.isRestricted },
+                set: { newValue in
+                    viewModel.toggleAppRestriction(app)
+                }
+            ))
         }
     }
 }
@@ -83,7 +68,6 @@ class RestrictedAppsViewModel: ObservableObject {
     @Published var restrictedApps: [RestrictedApp] = []
     
     init() {
-        // Load restricted apps
         loadRestrictedApps()
     }
     
@@ -91,15 +75,17 @@ class RestrictedAppsViewModel: ObservableObject {
         // TODO: Implement API call to load restricted apps
         // For now, using mock data
         restrictedApps = [
-            RestrictedApp(id: "1", name: "Instagram", icon: "camera.fill"),
-            RestrictedApp(id: "2", name: "YouTube", icon: "play.rectangle.fill"),
-            RestrictedApp(id: "3", name: "TikTok", icon: "video.fill")
+            RestrictedApp(id: "1", name: "Instagram", icon: "camera.fill", isRestricted: false),
+            RestrictedApp(id: "2", name: "YouTube", icon: "play.rectangle.fill", isRestricted: false),
+            RestrictedApp(id: "3", name: "TikTok", icon: "video.fill", isRestricted: false)
         ]
     }
     
-    func logAppUsage(appName: String, justification: String) {
-        // TODO: Implement API call to log app usage
-        print("Logged usage of \(appName) with justification: \(justification)")
+    func toggleAppRestriction(_ app: RestrictedApp) {
+        if let index = restrictedApps.firstIndex(where: { $0.id == app.id }) {
+            restrictedApps[index].isRestricted.toggle()
+            // TODO: Implement API call to update restriction status
+        }
     }
 }
 
@@ -107,6 +93,7 @@ struct RestrictedApp: Identifiable {
     let id: String
     let name: String
     let icon: String
+    var isRestricted: Bool
 }
 
 struct AccountSettingsView: View {
