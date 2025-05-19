@@ -104,6 +104,9 @@ struct AccountSettingsView: View {
                     NavigationLink(destination: Text("Profile Settings")) {
                         Label("Profile", systemImage: "person.fill")
                     }
+                    NavigationLink(destination: TimePeriodSettingsView()) {
+                        Label("Time Periods", systemImage: "clock.fill")
+                    }
                     NavigationLink(destination: Text("Notification Settings")) {
                         Label("Notifications", systemImage: "bell.fill")
                     }
