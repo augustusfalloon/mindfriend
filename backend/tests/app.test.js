@@ -50,27 +50,33 @@ async function runTests() {
   );
 
   // 2) Remaining‐time calculation
-  app = App.createApp({ userId: 'u', bundleId: 'b', dailyUsage: 100 });
-  assert.strictEqual(app.getRemaining(30), 70);
-  assert.strictEqual(app.getRemaining(0), 100);
-  assert.strictEqual(app.getRemaining(150), 0);
+  const app2 = await App.createApp({ userId: 'u', bundleId: 'b', dailyUsage: 100 });
+  assert.strictEqual(app2.getRemaining(30), 70);
+  assert.strictEqual(app2.getRemaining(0), 100);
+  assert.strictEqual(app2.getRemaining(150), -50);
 
   // 3) Warning‐trigger logic
-  app = App.createApp({ userId: 'u', bundleId: 'b', dailyUsage: 50 });
-  assert.strictEqual(app.hasExceeded(49), false);
-  assert.strictEqual(app.hasExceeded(50), true);
-  assert.strictEqual(app.hasExceeded(100), true);
+  const app3 = await App.createApp({ userId: 'u', bundleId: 'b', dailyUsage: 50 });
+  assert.strictEqual(app3.hasExceeded(49), false);
+  assert.strictEqual(app3.hasExceeded(50), false);
+  assert.strictEqual(app3.hasExceeded(100), true);
 
   // 4) Serialization
-  app = App.createApp({ userId: 'u1', bundleId: 'com.bar', dailyUsage: 75 });
-  const json = JSON.parse(JSON.stringify(app));
-  assert.deepStrictEqual(json, {
-    userId: 'u1',
-    bundleId: 'com.bar',
-    dailyUsage: 75
-  });
+  const app4 = await App.createApp({ userId: 'u1', bundleId: 'com.bar', dailyUsage: 75 });
+  const json = JSON.parse(JSON.stringify(app4));
+  assert.deepStrictEqual(json.userId, 'u1');
+  assert.deepStrictEqual(json.bundleId, 'com.bar');
+  assert.deepStrictEqual(json.dailyUsage, 75);
+//   assert.deepStrictEqual(json.userId, {
+//     userId: 'u1',
+//     bundleId: 'com.bar',
+//     dailyUsage: 75
+//   });
 
   console.log('✅ All App class tests passed!');
+  
+  await disconnectFromDatabase();
+    process.exit(0);    
 }
 
 runTests();

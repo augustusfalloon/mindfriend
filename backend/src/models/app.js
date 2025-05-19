@@ -20,5 +20,26 @@ AppSchema.statics.createApp = async function (params) {
   const app = new this({ userId: params.userId, bundleId: params.bundleId, dailyUsage: params.dailyUsage, restricted: false });
   return await app.save();
 };
+
+AppSchema.methods.getRemaining = function (usageMin) {
+    // console.log('params: ', params);
+    // const { usageMin } = params.usageMin;
+    // console.log(this.dailyUsage);
+    // console.log(usageMin);
+    // console.log(this.dailyUsage - usageMin);
+    return this.dailyUsage - usageMin;
+};
+
+AppSchema.methods.hasExceeded = function (usageMin) {
+    // console.log('params: ', params);
+    // const { usageMin } = paramgs.usageMin;
+    let remain = this.getRemaining(usageMin);
+    console.log("Remain: ", typeof(remain));
+    if (remain < 0) {
+        return true;
+    }
+    return false;
+};
+
 const App = mongoose.model('App', AppSchema);
 module.exports = App;
