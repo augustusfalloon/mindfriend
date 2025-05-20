@@ -1,9 +1,4 @@
-//
-//  ContentView.swift
-//  MindFriend
-//
-//  Created by Augustus Falloon on 5/1/25.
-//
+
 
 import SwiftUI
 
