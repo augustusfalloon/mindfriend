@@ -8,6 +8,22 @@ struct ScreenTimeRecord: Codable {
     let date: String
 }
 
+struct LoginRequest: Codable {
+    let username: String
+    let password: String
+}
+
+struct LoginResponse: Codable {
+    let token: String?      // or whatever your backend returns (e.g., userId, username, etc.)
+    let error: String?
+}
+
+struct SignupRequest: Codable {
+    let username: String
+    let password: String
+}
+
+
 // this will send the screen time data to the backend
 func sendScreenTime(record: ScreenTimeRecord, completion: @escaping (Result<ScreenTimeRecord, Error>) -> Void) {
     guard let url = URL(string: "http://localhost:3000/api/apps/") else {
@@ -69,6 +85,76 @@ func fetchScreenTime(userId: String, completion: @escaping (Result<[ScreenTimeRe
     task.resume()
 }
 
+
+func sendLogin(username: String, password: String, completion: @escaping (Result<LoginResponse, Error>) -> Void) {
+    guard let url = URL(string: "http://localhost:3000/api/users/login") else {
+        completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+        return
+    }
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    let loginData = LoginRequest(username: username, password: password)
+    do {
+        let jsonData = try JSONEncoder().encode(loginData)
+        request.httpBody = jsonData
+    } catch {
+        completion(.failure(error))
+        return
+    }
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            completion(.failure(error))
+            return
+        }
+        guard let data = data else {
+            completion(.failure(NSError(domain: "No data", code: 0)))
+            return
+        }
+        do {
+            let loginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
+            completion(.success(loginResponse))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+    task.resume()
+}
+
+func sendSignup(username: String, password: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
+  guard let url = URL(string: "http://localhost:3000/api/users/createUser") else {
+    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+    return
+  }
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  let signupData = SignupRequest(username: username, password: password)
+  do {
+    let jsonData = try JSONEncoder().encode(signupData)
+    request.httpBody = jsonData
+  } catch {
+    completion(.failure(error))
+    return
+  }
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    if let error = error {
+      completion(.failure(error))
+      return
+    }
+    guard let data = data else {
+      completion(.failure(NSError(domain: "No data", code: 0)))
+      return
+    }
+    do {
+      let signupResponse = try JSONDecoder().decode(SignupResponse.self, from: data)
+      completion(.success(signupResponse))
+    } catch {
+      completion(.failure(error))
+    }
+  }
+  task.resume()
+}
 
 // here is a sample record to test with
 let record = ScreenTimeRecord(
