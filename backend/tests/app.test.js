@@ -73,6 +73,8 @@ async function runTests() {
 //     dailyUsage: 75
 //   });
 
+
+  
   console.log('✅ All App class tests passed!');
   
   await disconnectFromDatabase();

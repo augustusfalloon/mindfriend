@@ -29,11 +29,11 @@ exports.createUser = async (req, res) => {
 // restrict an app for a user
 exports.restrictApp = async (req, res) => {
     try {
-        const { userID, appID } = req.body;
+        const { userID, bundleID, dailyUsage } = req.body;
         const user = await User.findOne({ userID });
         if (!user) throw new Error('User not found.');
 
-        await user.restrictApp(appID);
+        await user.restrictApp(bundleID, dailyUsage);
         await user.save();
 
         res.status(200).json({ message: 'App restricted successfully.' });
@@ -45,11 +45,11 @@ exports.restrictApp = async (req, res) => {
 // update a restriction for an app
 exports.updateRestriction = async (req, res) => {
     try {
-        const { userID, appID, newTime } = req.body;
+        const { userID, bundleID, newTime } = req.body;
         const user = await User.findOne({ userID });
         if (!user) throw new Error('User not found.');
 
-        await user.updateRestriction(appID, newTime);
+        await user.updateRestriction(bundleID, newTime);
         await user.save();
 
         res.status(200).json({ message: 'Restriction updated successfully.' });
@@ -57,6 +57,21 @@ exports.updateRestriction = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+
+exports.toggleRestriciton = async (req, res) => {
+    try {
+        const { userID, bundleID } = req.body;
+        const user = await User.findOne({ userID });
+        if (!user) throw new Error('User not found.');
+
+        await user.toggleRestriciton(bundleID);
+
+        res.status(200).json({ message: 'Restriction toggled successfully.' });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
 
 // add friend
 exports.addFriend = async (req, res) => {

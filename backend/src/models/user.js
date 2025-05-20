@@ -1,19 +1,16 @@
 // maybe MongoDB mongoose schemas for User.js: name, email, passwordHash, etc.
 
 const mongoose = require('mongoose');
+const App = require('./app.js');
 
-const appRestrictionSchema = new mongoose.Schema({
-    appID: { type: String, required: true },
-    timerDuration: { type: Number, required: true }, // time in seconds
-    timerRecurring: { type: Boolean, default: false } //should we recheck later?
-});
+
 
 const userSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     username: { type: String, required: true, unique: true },
     userID: { type: String, required: true, unique: true }, // UUID or Mongo ObjectId stored as a string?
     passwordHash: { type: String, required: true },  // <-- Make sure this field exists
-    restrictedApps: [appRestrictionSchema],
+    restrictedApps: [{ type: mongoose.Schema.Types.ObjectId, ref: 'App' }],
     friends: [{ type: String }], // list of userIDs (string references)
     usageHours: { type: Number, default: 0 }, // total usage hours
     highRiskTimeBlocks: [{ start: Date, end: Date }], // list of time blocks
@@ -32,28 +29,58 @@ userSchema.statics.createNewUser = async function({ fullName, username, userID }
 };
 
 // will add logic in next iteration
-userSchema.methods.restrictApp = function(appID) {
-    if (!appID || typeof appID !== 'string') {
-        throw new Error('Invalid appID');
+userSchema.methods.restrictApp = async function(bundleID, dailyUsage) {
+    if (!bundleID || typeof bundleID !== 'string') {
+        throw new Error('Invalid bundleID');
     }
-    const existingRestriction = this.restrictedApps.find(restriction => restriction.appID === appID);
-    if (!existingRestriction) {
-      this.restrictedApps.push({ appID, timerDuration: 0, timerRecurring: false });
+    const existingApp = await App.findOne({ userId: this.userID, bundleId: bundleID });
+    if (existingApp && this.restrictedApps.includes(existingApp._id)) {
+        throw new Error('App is already restricted');
     }
-    return this.save();
+    const newApp = await App.createApp({
+        userId: this.userID,
+        bundleId: bundleID,
+        dailyUsage: dailyUsage,
+        restricted: true,
+    });
+
+  // Save the reference in the user's restrictedApps
+  this.restrictedApps.push(newApp._id);
+  return this.save();
+
 };
 
-userSchema.methods.updateRestriction = function(appID, time) {
-    if (!appID || typeof appID !== 'string') {
+userSchema.methods.updateRestriction = async function(bundleId, time) {
+    if (!bundleId || typeof bundleId !== 'string') {
         throw new Error('Invalid appID');
     }
-    const restriction = this.restrictedApps.find(restriction => restriction.appID === appID);
-    if (restriction) {
-      restriction.timerDuration = time;
+    await this.populate("restrictedApps");
+
+    const existingApp = this.restrictedApps.find(app => app.bundleId === bundleId);
+    if (existingApp) {
+      existingApp.dailyUsage = time;
+        await existingApp.save();
     } else {
-      this.restrictedApps.push({ appID, timerDuration: time, timerRecurring: false });
+      throw new Error("No app found")
     }
-    return this.save();
+    return existingApp;
+};
+
+userSchema.methods.toggleRestriction = async function(bundleId) {
+    if (!bundleId || typeof bundleId !== 'string') {
+        throw new Error('Invalid appID');
+    }
+    await this.populate("restrictedApps");
+    const existingApp = this.restrictedApps.find(app => app.bundleId === bundleId);
+    if (existingApp) {
+    console.log(existingApp.restricted);
+      existingApp.restricted = !existingApp.restricted;
+      console.log(existingApp.restricted);
+        await existingApp.save();
+    } else {
+      throw new Error("No app found")
+    }
+    return existingApp;
 };
 
 userSchema.methods.addFriend = function(userID) {

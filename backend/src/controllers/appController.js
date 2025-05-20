@@ -6,47 +6,6 @@ const { createUser, restrictApp, updateRestriction, addFriend } = require('./use
 
 // need to rewrite to use the user method createnewuser
 
-const signUp = async (email, password, name) => {
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    throw new Error('User already exists');
-  }
-
-  const newUser = new User({ email, password, name });
-  await newUser.save();
-  await createUser(newUser);
-  return newUser;
-};
-
-const signIn = async (email, password) => {
-  const user = await User.findOne({ email });
-  if (!user || user.password !== password) {
-    throw new Error('Invalid credentials');
-  }
-
-  return user;
-};
-
-const signInOrSignUp = async (req, res) => {
-  const { email, password, name, signUp: isSignUp } = req.body;
-
-  try {
-    if (isSignUp) {
-      const newUser = await signUp(email, password, name);
-      return res.status(201).json(newUser);
-    } else {
-      const user = await signIn(email, password);
-      return res.status(200).json(user);
-    }
-  } catch (error) {
-    const statusCode =
-      error.message === 'User already exists' || error.message === 'Invalid credentials'
-        ? 400
-        : 500;
-    return res.status(statusCode).json({ message: error.message });
-  }
-};
-
 const setUsageHours = async (userId, usageHours) => {
   const user = await User.findById(userId);
   if (!user) {

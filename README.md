@@ -78,7 +78,7 @@ To run backend tests:
 - Leena - Coded MainTabView.swift, MindFriendUITests.swift
 
 ### Backend
-- Ethan Yoon - Database utils and config, test scripting, README
+- Ethan Yoon - Database utils and config, test scripting, README, Integrated new app interface through user, updated app.test.js for full functionality with DB. 
 - Joshua Enebo - functions in userController.js, appController.js, changes to the user and app classes, and wrote some tests in app.test.js and user.test.js
 - Luke Hermann - wrote backend tests (app.test.js, user.test.js), and helped write functions in appController, as well as looked into integration between front and backend with routing
 - Jake Zucker - wrote some backend tests for app.test.js, helped to work through initial phases of integration through use of XCode, contributed to design for appController.js 
@@ -87,21 +87,13 @@ To run backend tests:
 ### Milestone 4.A
 ## Backend
 # 1
-1. Get backend and frontend components fully integrated
-2. Implement the Screentime API
-3. Ammend any routes and models based on app metadata (i.e. identifies, codes, etc.)
+1. Backend implementation is fully completed with routes for frontend integration to follow before Milestone 6. 
+2. Tests check not only for correct field implementation but that they are corectly saved in the database, this was not the case in previous iterations
+3. Testing criteria and logging is more concise
+4. appRoutes is depreciated. All methods for creating and saving apps is now run through user model and routes.
+5. Created new user2.tests to test that functionality
 # 2
-1. Ethan and Jake - Write database tests to ensure that form submission creates, removes, or modifies documents
-2. Luke and Joshua - Implement integration between front and backend so that database gets updated
-# 3 
-1. When a user submits an app for restriction, attach that restrcition to the user profile
-2. When a user removes an app for restriction, dettach that restrction from the user profile
-3. When a user adds a friend, add them to their list of friends
-4. When a user removes a freind, remove them from the user's list of friends
-5. When a user creates an account, add the account as a user to the database
-6. When a user deletes an account, remove the account from the database
-7. Get a user's screentime restriction for a specific app from the database
-8. When a user goes over their alloted screentime, add flag to their restriction [set restriction as 0????]
+1. Not yet implemented is front end integration
 
 ##Frontend
 In this second development iteration, we are moving beyond the internal app logic and settings (which were largely completed in Iteration 1) to implement the core interaction mechanisms and social features that give MindFriend its value. These include:

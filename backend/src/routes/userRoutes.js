@@ -8,8 +8,14 @@ router.post('/', userController.createUser);
 // POST /api/users/restrict-app → Restrict an app
 router.post('/restrict-app', userController.restrictApp);
 
-// POST /api/users/update-restriction → Update restriction
-router.post('/update-restriction', userController.updateRestriction);
+// patch /api/users/update-restriction → Update restriction
+router.patch('/update-restriction', userController.updateRestriction);
+
+
+// patch
+router.patch('/toggle-restriciton', userController.toggleRestriciton);
+
+
 
 // POST /api/users/add-friend → Add a friend
 router.post('/add-friend', userController.addFriend);
