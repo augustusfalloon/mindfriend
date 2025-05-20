@@ -137,3 +137,51 @@ exports.login = async (req, res) => {
 exports.logout = async (req, res) => {
     return res.status(200).json({ message: 'Logout successful' });
 };
+
+/**
+ * Get all app restrictions and their associated times for a user.
+ */
+exports.getAppRestrictions = async (req, res) => {
+  try {
+    const { userID } = req.params;
+    const user = await User.findOne({ userID });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    res.status(200).json({ restrictedApps: user.restrictedApps });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Get all friends for a user.
+ */
+exports.getFriends = async (req, res) => {
+  try {
+    const { userID } = req.params;
+    const user = await User.findOne({ userID });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    res.status(200).json({ friends: user.friends });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Get all user data (excluding sensitive info like passwordHash).
+ */
+exports.getUserData = async (req, res) => {
+  try {
+    const { userID } = req.params;
+    const user = await User.findOne({ userID }).select('-passwordHash -__v -_id');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

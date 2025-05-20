@@ -28,4 +28,10 @@ router.post('/login', userController.login);
 // POST /api/users/logout → Logout a user
 router.post('/logout', userController.logout);
 
+// GET /api/users/:userID/restricted-apps → Get restricted apps
+router.get('/:userID/restricted-apps', userController.getRestrictedApps);
+// GET /api/users/:userID/friends → Get friends
+router.get('/:userID/friends', userController.getFriends);
+
+
 module.exports = router;
