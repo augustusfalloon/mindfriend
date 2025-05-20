@@ -2,17 +2,74 @@ import SwiftUI
 
 struct FeedView: View {
     @StateObject private var viewModel = FeedViewModel()
+    @State private var showingReasonSheet = false
+    @State private var selectedApp = ""
+    @State private var reason = ""
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(viewModel.friendActivities) { activity in
-                    ActivityRow(activity: activity)
+            ZStack {
+                List {
+                    ForEach(viewModel.friendActivities) { activity in
+                        ActivityRow(activity: activity)
+                    }
+                }
+                .navigationTitle("Friend Activity")
+                .refreshable {
+                    await viewModel.loadActivities()
+                }
+                
+                VStack {
+                    Spacer()
+                    Button(action: {
+                        showingReasonSheet = true
+                    }) {
+                        Text("Enter Reason")
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                    }
+                    .padding()
                 }
             }
-            .navigationTitle("Friend Activity")
-            .refreshable {
-                await viewModel.loadActivities()
+            .sheet(isPresented: $showingReasonSheet) {
+                NavigationView {
+                    Form {
+                        Section(header: Text("Select App")) {
+                            Picker("App", selection: $selectedApp) {
+                                ForEach(viewModel.restrictedApps, id: \.self) { app in
+                                    Text(app).tag(app)
+                                }
+                            }
+                        }
+                        
+                        Section(header: Text("Enter Reason")) {
+                            TextEditor(text: $reason)
+                                .frame(height: 100)
+                        }
+                        
+                        Section {
+                            Button(action: {
+                                viewModel.addActivity(appName: selectedApp, justification: reason)
+                                showingReasonSheet = false
+                                selectedApp = ""
+                                reason = ""
+                            }) {
+                                Text("Submit")
+                                    .frame(maxWidth: .infinity)
+                                    .foregroundColor(.white)
+                            }
+                            .disabled(selectedApp.isEmpty || reason.isEmpty)
+                            .listRowBackground(selectedApp.isEmpty || reason.isEmpty ? Color.gray : Color.blue)
+                        }
+                    }
+                    .navigationTitle("Enter Reason")
+                    .navigationBarItems(trailing: Button("Cancel") {
+                        showingReasonSheet = false
+                    })
+                }
             }
         }
     }
@@ -49,6 +106,7 @@ struct ActivityRow: View {
 
 class FeedViewModel: ObservableObject {
     @Published var friendActivities: [FriendActivity] = []
+    @Published var restrictedApps: [String] = ["Instagram", "YouTube", "TikTok", "Twitter", "Facebook"]
     
     init() {
         Task {
@@ -74,6 +132,16 @@ class FeedViewModel: ObservableObject {
                 justification: "Watching tutorial"
             )
         ]
+    }
+    
+    func addActivity(appName: String, justification: String) {
+        let newActivity = FriendActivity(
+            friendId: "currentUser", // TODO: Get actual user ID
+            friendName: "You", // TODO: Get actual username
+            appName: appName,
+            justification: justification
+        )
+        friendActivities.insert(newActivity, at: 0)
     }
 }
 
