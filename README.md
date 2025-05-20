@@ -63,8 +63,7 @@ To run backend tests:
    
 *Note: if you are receiving an error: "❌ Mongoose connection error: MongooseServerSelectionError: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017". There may be a couple things happening. First, you want to make sure that you are not trying to run our project from an SSH connection. Secondly, you may need to install MongoDB on your computer in order to connect to the database backend. If you are on a mac, use the following commands:
 $brew install mongodb-community@7.0
-$brew services start mongodb/brew/mongodb-community@7.0
-*
+$brew services start mongodb/brew/mongodb-community@7.0*
 
 ### Implementation Status
 - Connection with MongoDB database has been created
