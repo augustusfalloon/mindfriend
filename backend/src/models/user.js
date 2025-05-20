@@ -6,25 +6,23 @@ const App = require('./app.js');
 
 
 const userSchema = new mongoose.Schema({
-    fullName: { type: String, required: true },
+    email: { type: String, required: true },
     username: { type: String, required: true, unique: true },
     userID: { type: String, required: true, unique: true }, // UUID or Mongo ObjectId stored as a string?
     passwordHash: { type: String, required: true },  // <-- Make sure this field exists
     restrictedApps: [{ type: mongoose.Schema.Types.ObjectId, ref: 'App' }],
     friends: [{ type: String }], // list of userIDs (string references)
-    usageHours: { type: Number, default: 0 }, // total usage hours
-    highRiskTimeBlocks: [{ start: Date, end: Date }], // list of time blocks
 });
 
-userSchema.statics.createNewUser = async function({ fullName, username, userID }) {
-  if (!fullName || !username || !userID) {
-    throw new Error('Missing required fields: fullName, username, or userID');
+userSchema.statics.createNewUser = async function({ email, username, userID }) {
+  if (!email || !username || !userID) {
+    throw new Error('Missing required fields: email, username, or userID');
   }
   const existingUser = await this.findOne({ username });
   if (existingUser) {
     throw new Error('Username already exists');
   }
-  const newUser = new this({ fullName, username, userID });
+  const newUser = new this({ email, username, userID });
   return newUser.save();
 };
 

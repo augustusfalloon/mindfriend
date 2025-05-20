@@ -81,9 +81,6 @@ const getUsageLogs = async (req, res) => {
 
 
 module.exports = {
-  signInOrSignUp,
-  signUp,
-  signIn,
   setUsageHours,
   setHighRiskTimeBlocks,
   setRestrictedApps,

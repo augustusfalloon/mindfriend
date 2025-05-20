@@ -16,7 +16,6 @@ router.patch('/update-restriction', userController.updateRestriction);
 router.patch('/toggle-restriciton', userController.toggleRestriciton);
 
 
-
 // POST /api/users/add-friend → Add a friend
 router.post('/add-friend', userController.addFriend);
 
