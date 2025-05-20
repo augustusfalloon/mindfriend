@@ -59,8 +59,7 @@ The testing scripts in both the app tests and user tests documents have changed 
 ### Backend Testing
 To run backend tests:
 1. From the backend folder enter `npm install` to download all relevant packages
-2. Still in the backend folder enter `npm run...` and then the test you want (i.e. userTest or appTest)
-3. To run all tests enter `npm run tests` into the commandline
+2. Still in the backend folder enter `node tests/user2.test.js `
 
 ### Implementation Status
 - Connection with MongoDB database has been created
@@ -84,7 +83,7 @@ To run backend tests:
 - Jake Zucker - wrote some backend tests for app.test.js, helped to work through initial phases of integration through use of XCode, contributed to design for appController.js 
 
 
-### Milestone 4.A
+### Milestone 4.B
 ## Backend
 # 1
 1. Backend implementation is fully completed with routes for frontend integration to follow before Milestone 6. 
