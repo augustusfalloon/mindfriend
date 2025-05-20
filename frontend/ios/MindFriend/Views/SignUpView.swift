@@ -24,8 +24,8 @@ struct SignUpView: View {
                         .keyboardType(.emailAddress)
                         .disableAutocorrection(true)
                     
-                    SecureField("Password", text: $password)
-                    SecureField("Confirm Password", text: $confirmPassword)
+                    TextField("Password", text: $password)
+                    TextField("Confirm Password", text: $confirmPassword)
                 }
                 
                 Section {
@@ -88,7 +88,7 @@ struct SignUpView: View {
                 username: username,
                 email: email,
                 password: password,
-                cPassword: confirmPassword
+                userID: confirmPassword
             ) { result in
                 switch result {
                 case .success(let response):

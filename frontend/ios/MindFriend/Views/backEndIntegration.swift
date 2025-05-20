@@ -22,22 +22,13 @@ public struct SignupRequest: Codable {
     let username: String
     let email: String
     let password: String
-    let cPassword: String
+    let userID: String
 }
 
-<<<<<<< HEAD:frontend/backEndIntegration.swift
-struct SignupResponse: Codable {
+public struct SignupResponse: Codable {
     let token: String?
     let error: String?
 }
-
-
-=======
-public struct SignupResponse: Codable {
-    let success: Bool?
-    let error: String?
-}
->>>>>>> d554cba (Update: Moved backEndIntegration to Views folder and updated login/signup functionality):frontend/ios/MindFriend/Views/backEndIntegration.swift
 
 // this will send the screen time data to the backend
 func sendScreenTime(record: ScreenTimeRecord, completion: @escaping (Result<ScreenTimeRecord, Error>) -> Void) {
@@ -152,106 +143,15 @@ public func sendLogin(username: String, password: String, completion: @escaping 
     task.resume()
 }
 
-<<<<<<< HEAD:frontend/backEndIntegration.swift
-// Restrict an app for a user (matches user.js: restrictApp expects userId, bundleID, dailyUsage)
-func restrictApp(userId: String, bundleID: String, dailyUsage: Int, completion: @escaping (Result<Bool, Error>) -> Void) {
-  guard let url = URL(string: "http://localhost:3000/api/users/restrictApp") else {
+public func sendSignup(username: String, email: String, password: String, userID: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
+  guard let url = URL(string: "http://localhost:3000/api/users/") else {
     completion(.failure(NSError(domain: "Invalid URL", code: 0)))
     return
   }
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  let body: [String: Any] = [
-    "userId": userId,
-    "bundleID": bundleID,
-    "dailyUsage": dailyUsage
-  ]
-  do {
-    request.httpBody = try JSONSerialization.data(withJSONObject: body)
-  } catch {
-    completion(.failure(error))
-    return
-  }
-  let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    if let error = error {
-      completion(.failure(error))
-      return
-    }
-    completion(.success(true))
-  }
-  task.resume()
-}
-
-// Update an app restriction for a user (matches user.js: updateRestriction expects userId, bundleID, time)
-func updateRestriction(userId: String, bundleID: String, time: Int, completion: @escaping (Result<Bool, Error>) -> Void) {
-  guard let url = URL(string: "http://localhost:3000/api/users/updateRestriction") else {
-    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
-    return
-  }
-  var request = URLRequest(url: url)
-  request.httpMethod = "PUT"
-  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  let body: [String: Any] = [
-    "userId": userId,
-    "bundleID": bundleID,
-    "time": time
-  ]
-  do {
-    request.httpBody = try JSONSerialization.data(withJSONObject: body)
-  } catch {
-    completion(.failure(error))
-    return
-  }
-  let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    if let error = error {
-      completion(.failure(error))
-      return
-    }
-    completion(.success(true))
-  }
-  task.resume()
-}
-
-// Add a friend by userId (matches user.js: addFriend expects userId)
-func addFriend(userId: String, completion: @escaping (Result<Bool, Error>) -> Void) {
-  guard let url = URL(string: "http://localhost:3000/api/users/addFriend") else {
-    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
-    return
-  }
-  var request = URLRequest(url: url)
-  request.httpMethod = "POST"
-  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  let body: [String: Any] = [
-    "userId": userId
-  ]
-  do {
-    request.httpBody = try JSONSerialization.data(withJSONObject: body)
-  } catch {
-    completion(.failure(error))
-    return
-  }
-  let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    if let error = error {
-      completion(.failure(error))
-      return
-    }
-    completion(.success(true))
-  }
-  task.resume()
-}
-func sendSignup(username: String, email: String, password: String, c_password: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
-=======
-public func sendSignup(username: String, email: String, password: String, cPassword: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
->>>>>>> d554cba (Update: Moved backEndIntegration to Views folder and updated login/signup functionality):frontend/ios/MindFriend/Views/backEndIntegration.swift
-  guard let url = URL(string: "http://localhost:3000/api/users/createUser") else {
-    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
-    return
-  }
-  var request = URLRequest(url: url)
-  request.httpMethod = "POST"
-  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  let signupData = SignupRequest(username: username, email: email, password: password, cPassword: cPassword)
+  let signupData = SignupRequest(username: username, email: email, password: password, userID: userID)
   do {
     let jsonData = try JSONEncoder().encode(signupData)
     request.httpBody = jsonData
