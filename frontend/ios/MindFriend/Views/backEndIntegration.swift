@@ -1,34 +1,34 @@
 import Foundation
 
 // this is a sample screen time model, but we can change this based on the screen time api 
-struct ScreenTimeRecord: Codable {
+public struct ScreenTimeRecord: Codable {
     let userId: String
     let appId: String
     let usage: Int
     let date: String
 }
 
-struct LoginRequest: Codable {
+public struct LoginRequest: Codable {
     let username: String
     let password: String
 }
 
-struct LoginResponse: Codable {
+public struct LoginResponse: Codable {
     let token: String?      // or whatever your backend returns (e.g., userId, username, etc.)
     let error: String?
 }
 
-struct SignupRequest: Codable {
+public struct SignupRequest: Codable {
     let username: String
+    let email: String
     let password: String
+    let cPassword: String
 }
 
-struct SignupResponse: Codable {
-    let token: String?
+public struct SignupResponse: Codable {
+    let success: Bool?
     let error: String?
 }
-
-
 
 // this will send the screen time data to the backend
 func sendScreenTime(record: ScreenTimeRecord, completion: @escaping (Result<ScreenTimeRecord, Error>) -> Void) {
@@ -91,8 +91,24 @@ func fetchScreenTime(userId: String, completion: @escaping (Result<[ScreenTimeRe
     task.resume()
 }
 
+// public func sendLogin(username: String, password: String) async throws -> LoginResponse {
+//     guard let url = URL(string: "http://localhost:3000/api/users/login") else {
+//         throw NSError(domain: "Invalid URL", code: 0)
+//     }
+    
+//     var request = URLRequest(url: url)
+//     request.httpMethod = "POST"
+//     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    
+//     let loginData = LoginRequest(username: username, password: password)
+//     let jsonData = try JSONEncoder().encode(loginData)
+//     request.httpBody = jsonData
+    
+//     let (data, _) = try await URLSession.shared.data(for: request)
+//     return try JSONDecoder().decode(LoginResponse.self, from: data)
+// }
 
-func sendLogin(username: String, password: String, completion: @escaping (Result<LoginResponse, Error>) -> Void) {
+public func sendLogin(username: String, password: String, completion: @escaping (Result<LoginResponse, Error>) -> Void) {
     guard let url = URL(string: "http://localhost:3000/api/users/login") else {
         completion(.failure(NSError(domain: "Invalid URL", code: 0)))
         return
@@ -127,94 +143,7 @@ func sendLogin(username: String, password: String, completion: @escaping (Result
     task.resume()
 }
 
-// Restrict an app for a user (matches user.js: restrictApp expects userId, bundleID, dailyUsage)
-func restrictApp(userId: String, bundleID: String, dailyUsage: Int, completion: @escaping (Result<Bool, Error>) -> Void) {
-  guard let url = URL(string: "http://localhost:3000/api/users/restrictApp") else {
-    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
-    return
-  }
-  var request = URLRequest(url: url)
-  request.httpMethod = "POST"
-  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  let body: [String: Any] = [
-    "userId": userId,
-    "bundleID": bundleID,
-    "dailyUsage": dailyUsage
-  ]
-  do {
-    request.httpBody = try JSONSerialization.data(withJSONObject: body)
-  } catch {
-    completion(.failure(error))
-    return
-  }
-  let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    if let error = error {
-      completion(.failure(error))
-      return
-    }
-    completion(.success(true))
-  }
-  task.resume()
-}
-
-// Update an app restriction for a user (matches user.js: updateRestriction expects userId, bundleID, time)
-func updateRestriction(userId: String, bundleID: String, time: Int, completion: @escaping (Result<Bool, Error>) -> Void) {
-  guard let url = URL(string: "http://localhost:3000/api/users/updateRestriction") else {
-    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
-    return
-  }
-  var request = URLRequest(url: url)
-  request.httpMethod = "PUT"
-  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  let body: [String: Any] = [
-    "userId": userId,
-    "bundleID": bundleID,
-    "time": time
-  ]
-  do {
-    request.httpBody = try JSONSerialization.data(withJSONObject: body)
-  } catch {
-    completion(.failure(error))
-    return
-  }
-  let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    if let error = error {
-      completion(.failure(error))
-      return
-    }
-    completion(.success(true))
-  }
-  task.resume()
-}
-
-// Add a friend by userId (matches user.js: addFriend expects userId)
-func addFriend(userId: String, completion: @escaping (Result<Bool, Error>) -> Void) {
-  guard let url = URL(string: "http://localhost:3000/api/users/addFriend") else {
-    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
-    return
-  }
-  var request = URLRequest(url: url)
-  request.httpMethod = "POST"
-  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  let body: [String: Any] = [
-    "userId": userId
-  ]
-  do {
-    request.httpBody = try JSONSerialization.data(withJSONObject: body)
-  } catch {
-    completion(.failure(error))
-    return
-  }
-  let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    if let error = error {
-      completion(.failure(error))
-      return
-    }
-    completion(.success(true))
-  }
-  task.resume()
-}
-func sendSignup(username: String, email: String, password: String, c_password: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
+public func sendSignup(username: String, email: String, password: String, cPassword: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
   guard let url = URL(string: "http://localhost:3000/api/users/createUser") else {
     completion(.failure(NSError(domain: "Invalid URL", code: 0)))
     return
@@ -222,7 +151,7 @@ func sendSignup(username: String, email: String, password: String, c_password: S
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  let signupData = SignupRequest(username: username, password: password)
+  let signupData = SignupRequest(username: username, email: email, password: password, cPassword: cPassword)
   do {
     let jsonData = try JSONEncoder().encode(signupData)
     request.httpBody = jsonData
@@ -257,14 +186,14 @@ let record = ScreenTimeRecord(
     date: ISO8601DateFormatter().string(from: Date())
 )
 
-sendScreenTime(record: record) { result in
-    switch result {
-    case .success(let responseRecord):
-        print("Screen time sent: \(responseRecord)")
-    case .failure(let error):
-        print("Error sending screen time: \(error)")
-    }
-}
+// sendScreenTime(record: record) { result in
+//     switch result {
+//     case .success(let responseRecord):
+//         print("Screen time sent: \(responseRecord)")
+//     case .failure(let error):
+//         print("Error sending screen time: \(error)")
+//     }
+// }
 
 // fetchScreenTime(userId: "user123") { result in
 //     switch result {
