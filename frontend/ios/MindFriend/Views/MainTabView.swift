@@ -1,8 +1,17 @@
 import SwiftUI
+import FamilyControls
+import UserNotifications
 
 struct MainTabView: View {
+    @StateObject private var viewModel = RestrictedAppsViewModel()
+    @State private var showingEditRestrictedApps = false
+    @State private var showingAuthorizationAlert = false
+    @State private var authorizationError: String?
+    @State private var hasRequestedPermissions = false
+    
     var body: some View {
         TabView {
+            
             RestrictedAppsView()
                 .tabItem {
                     Label("Apps", systemImage: "app.badge")
@@ -22,6 +31,46 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Account", systemImage: "person.circle")
                 }
+        }
+        .sheet(isPresented: $showingEditRestrictedApps) {
+            EditRestrictedAppsView(viewModel: viewModel)
+        }
+        .onAppear {
+            if !hasRequestedPermissions {
+                requestPermissions()
+            }
+        }
+        .alert("Permission Required", isPresented: $showingAuthorizationAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(authorizationError ?? "Please grant the required permissions to use this app.")
+        }
+    }
+    
+    private func requestPermissions() {
+        // Request Screen Time permissions
+        Task {
+            do {
+                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                    DispatchQueue.main.async {
+                        if let error = error {
+                            authorizationError = "Failed to request notification permissions: \(error.localizedDescription)"
+                            showingAuthorizationAlert = true
+                        }
+                        hasRequestedPermissions = true
+                    }
+                }
+                
+                try await ScreenTimeManager.shared.requestAuthorization()
+                // Request notification permissions
+                
+            } catch {
+                DispatchQueue.main.async {
+                    authorizationError = "Failed to request Screen Time permissions: \(error.localizedDescription)"
+                    showingAuthorizationAlert = true
+                    hasRequestedPermissions = true
+                }
+            }
         }
     }
 }
@@ -159,7 +208,8 @@ class RestrictedAppsViewModel: ObservableObject {
             RestrictedApp(id: "5", name: "Twitter", icon: "bubble.left.fill", isRestricted: false),
             RestrictedApp(id: "6", name: "Snapchat", icon: "camera.viewfinder", isRestricted: false),
             RestrictedApp(id: "7", name: "Reddit", icon: "globe", isRestricted: false),
-            RestrictedApp(id: "8", name: "Pinterest", icon: "pin.fill", isRestricted: false)
+            RestrictedApp(id: "8", name: "Pinterest", icon: "pin.fill", isRestricted: false),
+            RestrictedApp(id: "9", name: "Contacts", icon: "person.crop.circle.fill", isRestricted: false)
         ]
     }
     

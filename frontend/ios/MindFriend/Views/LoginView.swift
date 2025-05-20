@@ -1,4 +1,5 @@
 import SwiftUI
+import FamilyControls
 
 struct LoginView: View {
     @State private var username: String = ""
