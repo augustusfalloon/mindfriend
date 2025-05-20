@@ -23,6 +23,12 @@ struct SignupRequest: Codable {
     let password: String
 }
 
+struct SignupResponse: Codable {
+    let token: String?
+    let error: String?
+}
+
+
 
 // this will send the screen time data to the backend
 func sendScreenTime(record: ScreenTimeRecord, completion: @escaping (Result<ScreenTimeRecord, Error>) -> Void) {
@@ -121,6 +127,93 @@ func sendLogin(username: String, password: String, completion: @escaping (Result
     task.resume()
 }
 
+// Restrict an app for a user (matches user.js: restrictApp expects userId, bundleID, dailyUsage)
+func restrictApp(userId: String, bundleID: String, dailyUsage: Int, completion: @escaping (Result<Bool, Error>) -> Void) {
+  guard let url = URL(string: "http://localhost:3000/api/users/restrictApp") else {
+    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+    return
+  }
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  let body: [String: Any] = [
+    "userId": userId,
+    "bundleID": bundleID,
+    "dailyUsage": dailyUsage
+  ]
+  do {
+    request.httpBody = try JSONSerialization.data(withJSONObject: body)
+  } catch {
+    completion(.failure(error))
+    return
+  }
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    if let error = error {
+      completion(.failure(error))
+      return
+    }
+    completion(.success(true))
+  }
+  task.resume()
+}
+
+// Update an app restriction for a user (matches user.js: updateRestriction expects userId, bundleID, time)
+func updateRestriction(userId: String, bundleID: String, time: Int, completion: @escaping (Result<Bool, Error>) -> Void) {
+  guard let url = URL(string: "http://localhost:3000/api/users/updateRestriction") else {
+    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+    return
+  }
+  var request = URLRequest(url: url)
+  request.httpMethod = "PUT"
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  let body: [String: Any] = [
+    "userId": userId,
+    "bundleID": bundleID,
+    "time": time
+  ]
+  do {
+    request.httpBody = try JSONSerialization.data(withJSONObject: body)
+  } catch {
+    completion(.failure(error))
+    return
+  }
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    if let error = error {
+      completion(.failure(error))
+      return
+    }
+    completion(.success(true))
+  }
+  task.resume()
+}
+
+// Add a friend by userId (matches user.js: addFriend expects userId)
+func addFriend(userId: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+  guard let url = URL(string: "http://localhost:3000/api/users/addFriend") else {
+    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+    return
+  }
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  let body: [String: Any] = [
+    "userId": userId
+  ]
+  do {
+    request.httpBody = try JSONSerialization.data(withJSONObject: body)
+  } catch {
+    completion(.failure(error))
+    return
+  }
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    if let error = error {
+      completion(.failure(error))
+      return
+    }
+    completion(.success(true))
+  }
+  task.resume()
+}
 func sendSignup(username: String, password: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
   guard let url = URL(string: "http://localhost:3000/api/users/createUser") else {
     completion(.failure(NSError(domain: "Invalid URL", code: 0)))
@@ -158,7 +251,7 @@ func sendSignup(username: String, password: String, completion: @escaping (Resul
 
 // here is a sample record to test with
 let record = ScreenTimeRecord(
-    userId: "user123",
+    userId: "user123", 
     appId: "com.example.app",
     usage: 120,
     date: ISO8601DateFormatter().string(from: Date())
