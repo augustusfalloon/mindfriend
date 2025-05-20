@@ -1,96 +1,133 @@
 import SwiftUI
 
 struct SignUpView: View {
-    @State private var email = ""
-    @State private var password = ""
-    @State private var confirmPassword = ""
-    @State private var username = ""
-    @State private var showingAlert = false
-    @State private var alertMessage = ""
     @Environment(\.dismiss) private var dismiss
+    @State private var username: String = ""
+    @State private var email: String = ""
+    @State private var password: String = ""
+    @State private var confirmPassword: String = ""
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    var onSignUpSuccess: (String) -> Void
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                Text("Create Account")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .padding(.top, 50)
-                
-                VStack(spacing: 15) {
+            Form {
+                Section(header: Text("Account Information")) {
                     TextField("Username", text: $username)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
                         .autocapitalization(.none)
+                        .disableAutocorrection(true)
                     
                     TextField("Email", text: $email)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
                         .autocapitalization(.none)
                         .keyboardType(.emailAddress)
+                        .disableAutocorrection(true)
                     
                     SecureField("Password", text: $password)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    
                     SecureField("Confirm Password", text: $confirmPassword)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
                 }
-                .padding(.horizontal, 32)
                 
-                Button(action: signUp) {
-                    Text("Sign Up")
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(10)
+                Section {
+                    if isLoading {
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                            Spacer()
+                        }
+                    } else {
+                        Button(action: {
+                            Task {
+                                await signUp()
+                            }
+                        }) {
+                            Text("Create Account")
+                                .frame(maxWidth: .infinity)
+                                .foregroundColor(.white)
+                        }
+                        .disabled(!isFormValid)
+                        .listRowBackground(isFormValid ? Color.blue : Color.gray)
+                    }
                 }
-                .padding(.horizontal, 32)
-                
-                Spacer()
             }
-            .navigationBarItems(leading: Button("Cancel") {
+            .navigationTitle("Sign Up")
+            .navigationBarItems(trailing: Button("Cancel") {
                 dismiss()
             })
-            .alert(isPresented: $showingAlert) {
-                Alert(
-                    title: Text("Error"),
-                    message: Text(alertMessage),
-                    dismissButton: .default(Text("OK"))
-                )
+            .alert("Error", isPresented: .constant(errorMessage != nil)) {
+                Button("OK") {
+                    errorMessage = nil
+                }
+            } message: {
+                Text(errorMessage ?? "")
             }
         }
     }
     
-    private func signUp() {
-        // Validate input
-        guard !username.isEmpty else {
-            alertMessage = "Please enter a username"
-            showingAlert = true
+    private var isFormValid: Bool {
+        !username.isEmpty &&
+        !email.isEmpty &&
+        !password.isEmpty &&
+        password == confirmPassword &&
+        password.count >= 6 &&
+        email.contains("@")
+    }
+    
+    private func signUp() async {
+        guard isFormValid else {
+            errorMessage = "Please fill in all fields correctly"
             return
         }
         
-        guard !email.isEmpty else {
-            alertMessage = "Please enter an email"
-            showingAlert = true
+        isLoading = true
+        defer { isLoading = false }
+        
+        guard let url = URL(string: "http://localhost:3000/api/auth/signup") else {
+            errorMessage = "Invalid server URL"
             return
         }
         
-        guard !password.isEmpty else {
-            alertMessage = "Please enter a password"
-            showingAlert = true
+        let signUpData = [
+            "username": username,
+            "email": email,
+            "password": password
+        ]
+        
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: signUpData) else {
+            errorMessage = "Failed to create request data"
             return
         }
         
-        guard password == confirmPassword else {
-            alertMessage = "Passwords do not match"
-            showingAlert = true
-            return
-        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
         
-        // TODO: Implement actual sign up logic here
-        // This is where you would make the API call to your backend
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                errorMessage = "Invalid server response"
+                return
+            }
+            
+            if httpResponse.statusCode == 201 {
+                onSignUpSuccess("Account created successfully! Please log in.")
+                dismiss()
+            } else {
+                if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let message = errorJson["message"] as? String {
+                    errorMessage = message
+                } else {
+                    errorMessage = "Sign up failed"
+                }
+            }
+        } catch {
+            errorMessage = "Network error: \(error.localizedDescription)"
+        }
     }
 }
 
 #Preview {
-    SignUpView()
+    SignUpView(onSignUpSuccess: { _ in })
 } 
+

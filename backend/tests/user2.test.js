@@ -18,7 +18,7 @@ async function runTests() {
     await clearDatabase();
     
 
-    const user = await User.create({fullName: 'Alice Johnson', username: 'alicej', userID: 'user123', passwordHash: 'someHashedPassword' });
+    const user = await User.create({email: 'Alice Johnson', username: 'alicej', userID: 'user123', passwordHash: 'someHashedPassword' });
     await user.save();
 
     await user.restrictApp('com.foo', 60);

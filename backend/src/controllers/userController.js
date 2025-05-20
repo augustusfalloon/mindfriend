@@ -6,8 +6,8 @@ const User = require('../models/user');
 const bcrypt = require('bcrypt');
 exports.createUser = async (req, res) => {
     try {
-        const { fullName, username, userID, password } = req.body;
-        if (!fullName || !username || !userID || !password) {
+        const { email, username, userID, password } = req.body;
+        if (!email || !username || !userID || !password) {
             throw new Error('Missing required fields');
         }
         
@@ -19,7 +19,7 @@ exports.createUser = async (req, res) => {
         
         // hash the password
         const passwordHash = await bcrypt.hash(password, 10);
-        const newUser = new User({ fullName, username, userID, passwordHash, restrictedApps: [], friends: [] });
+        const newUser = new User({ email, username, userID, passwordHash, restrictedApps: [], friends: [] });
         await newUser.save();
         res.status(201).json(newUser);
     } catch (error) {

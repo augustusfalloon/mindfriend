@@ -5,14 +5,14 @@ import SwiftUI
 struct MindFriendApp: App {
     
     init() {
-        Task {
-            do {
-                try await ScreenTimeManager.shared.requestAuthorization()
-                try await NotificationManager.shared.requestAuthorization()
-            } catch {
-                print("Authorization error: \(error)")
-            }
-        }
+//        Task {
+//            do {
+//                //try await ScreenTimeManager.shared.requestAuthorization()
+//                //try await NotificationManager.shared.requestAuthorization()
+//            } catch {
+//                print("Authorization error: \(error)")
+//            }
+//        }
     }
 
     var body: some Scene {

@@ -214,7 +214,7 @@ func addFriend(userId: String, completion: @escaping (Result<Bool, Error>) -> Vo
   }
   task.resume()
 }
-func sendSignup(username: String, password: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
+func sendSignup(username: String, email: String, password: String, c_password: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
   guard let url = URL(string: "http://localhost:3000/api/users/createUser") else {
     completion(.failure(NSError(domain: "Invalid URL", code: 0)))
     return
