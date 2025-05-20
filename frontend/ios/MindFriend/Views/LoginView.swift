@@ -1,6 +1,7 @@
 import SwiftUI
 import FamilyControls
 
+
 struct LoginView: View {
     @State private var username: String = ""
     @State private var password: String = ""
@@ -62,7 +63,7 @@ struct LoginView: View {
             .padding()
             .alert("Error", isPresented: .constant(errorMessage != nil)) {
                 Button("OK") {
-                    errorMessage = nil
+                    errorMessage = "Failed to Login. Invalid Credentials."
                 }
             } message: {
                 Text(errorMessage ?? "")
@@ -95,61 +96,43 @@ struct LoginView: View {
         isLoading = true
         defer { isLoading = false }
         
-        // Create the login request
-        guard let url = URL(string: "http://localhost:3000/") else {
-            errorMessage = "Invalid server URL"
-            return
-        }
-        
-        // Create the request body
-        let loginData = [
-            "username": username,
-            "password": password
-        ]
-        
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: loginData) else {
-            errorMessage = "Failed to create request data"
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonData
-        
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                errorMessage = "Invalid server response"
-                return
-            }
-            
-            if httpResponse.statusCode == 200 {
-                // Successfully logged in
-                if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let token = json["token"] as? String {
-                    // Store the token securely
-                    UserDefaults.standard.set(token, forKey: "authToken")
-                    isLoggedIn = true
-                } else {
-                    errorMessage = "Invalid response format"
+        // Create a continuation to handle the async completion
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            sendLogin(
+                username: username,
+                password: password
+            ) { result in
+                switch result {
+                case .success(let response):
+                    if let error = response.error {
+                        // Handle backend error
+                        DispatchQueue.main.async {
+                            self.errorMessage = error
+                        }
+                    } else if let token = response.token {
+                        // Success case - store token and proceed
+                        DispatchQueue.main.async {
+                            UserDefaults.standard.set(token, forKey: "authToken")
+                            self.isLoggedIn = true
+                        }
+                    } else {
+                        // Handle case where neither error nor token is present
+                        DispatchQueue.main.async {
+                            self.errorMessage = "Invalid response from server"
+                        }
+                    }
+                case .failure(let error):
+                    // Handle network or other errors
+                    DispatchQueue.main.async {
+                        self.errorMessage = "Login failed: \(error.localizedDescription)"
+                    }
                 }
-            } else {
-                // Handle error response
-                if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let message = errorJson["message"] as? String {
-                    errorMessage = message
-                } else {
-                    errorMessage = "Login failed"
-                }
+                continuation.resume()
             }
-        } catch {
-            errorMessage = "Network error: \(error.localizedDescription)"
         }
     }
 }
-
 #Preview {
     LoginView()
 } 
+

@@ -1,5 +1,6 @@
 import SwiftUI
 
+
 struct SignUpView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var username: String = ""
@@ -55,7 +56,7 @@ struct SignUpView: View {
             })
             .alert("Error", isPresented: .constant(errorMessage != nil)) {
                 Button("OK") {
-                    errorMessage = nil
+                    errorMessage = "Sign Up Failed. Invalid Credentials."
                 }
             } message: {
                 Text(errorMessage ?? "")
@@ -72,7 +73,7 @@ struct SignUpView: View {
         email.contains("@")
     }
     
-    private func signUp() async {
+    public func signUp() async {
         guard isFormValid else {
             errorMessage = "Please fill in all fields correctly"
             return
@@ -81,53 +82,39 @@ struct SignUpView: View {
         isLoading = true
         defer { isLoading = false }
         
-        guard let url = URL(string: "http://localhost:3000/api/auth/signup") else {
-            errorMessage = "Invalid server URL"
-            return
-        }
-        
-        let signUpData = [
-            "username": username,
-            "email": email,
-            "password": password
-        ]
-        
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: signUpData) else {
-            errorMessage = "Failed to create request data"
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonData
-        
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                errorMessage = "Invalid server response"
-                return
-            }
-            
-            if httpResponse.statusCode == 201 {
-                onSignUpSuccess("Account created successfully! Please log in.")
-                dismiss()
-            } else {
-                if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let message = errorJson["message"] as? String {
-                    errorMessage = message
-                } else {
-                    errorMessage = "Sign up failed"
+        // Create a continuation to handle the async completion
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            sendSignup(
+                username: username,
+                email: email,
+                password: password,
+                cPassword: confirmPassword
+            ) { result in
+                switch result {
+                case .success(let response):
+                    if let error = response.error {
+                        // Handle backend error
+                        DispatchQueue.main.async {
+                            self.errorMessage = error
+                        }
+                    } else {
+                        // Success case
+                        DispatchQueue.main.async {
+                            self.onSignUpSuccess("Account created successfully! Please log in.")
+                            self.dismiss()
+                        }
+                    }
+                case .failure(let error):
+                    // Handle network or other errors
+                    DispatchQueue.main.async {
+                        self.errorMessage = "Sign up failed: \(error.localizedDescription)"
+                    }
                 }
+                continuation.resume()
             }
-        } catch {
-            errorMessage = "Network error: \(error.localizedDescription)"
         }
     }
 }
-
 #Preview {
     SignUpView(onSignUpSuccess: { _ in })
 } 
-
