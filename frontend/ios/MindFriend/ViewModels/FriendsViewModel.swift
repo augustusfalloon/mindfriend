@@ -5,6 +5,7 @@ class FriendsViewModel: ObservableObject {
     @Published var friends: [String] = []
     @Published var pendingRequests: [String] = []
     @Published var searchResults: [String] = []
+    @Published var error: String?
     
     private var cancellables = Set<AnyCancellable>()
     

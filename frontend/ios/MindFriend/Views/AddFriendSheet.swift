@@ -76,9 +76,11 @@ struct AddFriendSheet: View {
             } message: {
                 Text(errorMessage)
             }
-            .onReceive(viewModel.$error.compactMap { $0 }) { newError in
-                errorMessage = newError
-                showError = true
+            .onReceive(viewModel.$error) { newError in
+                if let error = newError {
+                    errorMessage = error
+                    showError = true
+                }
             }
         }
     }
