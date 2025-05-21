@@ -22,34 +22,12 @@ public struct SignupRequest: Codable {
     let username: String
     let email: String
     let password: String
-    let userID: String
+    let cPassword: String
 }
 
 public struct SignupResponse: Codable {
-    let token: String?
+    let success: Bool?
     let error: String?
-}
-
-public struct RestrictAppRequest: Codable {
-  let userId: String
-  let bundleId: String
-  let dailyLimit: Int?
-}
-
-public struct RestrictAppResponse: Codable {
-  let success: Bool
-  let error: String?
-}
-
-public struct UpdateRestrictionRequest: Codable {
-  let userId: String
-  let bundleId: String
-  let newdailyLimit: Int?
-}
-
-public struct UpdateRestrictionResponse: Codable {
-  let success: Bool
-  let error: String?
 }
 
 // this will send the screen time data to the backend
@@ -165,15 +143,104 @@ public func sendLogin(username: String, password: String, completion: @escaping 
     task.resume()
 }
 
-public func sendSignup(username: String, email: String, password: String, userID: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
-  guard let url = URL(string: "http://localhost:3000/api/users/") else {
+// Restrict an app for a user (matches user.js: restrictApp expects userId, bundleID, dailyUsage)
+func restrictApp(userId: String, bundleID: String, dailyUsage: Int, completion: @escaping (Result<Bool, Error>) -> Void) {
+  guard let url = URL(string: "http://localhost:3000/api/users/restrictApp") else {
     completion(.failure(NSError(domain: "Invalid URL", code: 0)))
     return
   }
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  let signupData = SignupRequest(username: username, email: email, password: password, userID: userID)
+  let body: [String: Any] = [
+    "userId": userId,
+    "bundleID": bundleID,
+    "dailyUsage": dailyUsage
+  ]
+  do {
+    request.httpBody = try JSONSerialization.data(withJSONObject: body)
+  } catch {
+    completion(.failure(error))
+    return
+  }
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    if let error = error {
+      completion(.failure(error))
+      return
+    }
+    completion(.success(true))
+  }
+  task.resume()
+}
+
+// Update an app restriction for a user (matches user.js: updateRestriction expects userId, bundleID, time)
+func updateRestriction(userId: String, bundleID: String, time: Int, completion: @escaping (Result<Bool, Error>) -> Void) {
+  guard let url = URL(string: "http://localhost:3000/api/users/updateRestriction") else {
+    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+    return
+  }
+  var request = URLRequest(url: url)
+  request.httpMethod = "PUT"
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  let body: [String: Any] = [
+    "userId": userId,
+    "bundleID": bundleID,
+    "time": time
+  ]
+  do {
+    request.httpBody = try JSONSerialization.data(withJSONObject: body)
+  } catch {
+    completion(.failure(error))
+    return
+  }
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    if let error = error {
+      completion(.failure(error))
+      return
+    }
+    completion(.success(true))
+  }
+  task.resume()
+}
+
+// Add a friend by userId (matches user.js: addFriend expects userId)
+func addFriend(userId: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+  guard let url = URL(string: "http://localhost:3000/api/users/addFriend") else {
+    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+    return
+  }
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  let body: [String: Any] = [
+    "userId": userId
+  ]
+  do {
+    request.httpBody = try JSONSerialization.data(withJSONObject: body)
+  } catch {
+    completion(.failure(error))
+    return
+  }
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    if let error = error {
+      completion(.failure(error))
+      return
+    }
+    completion(.success(true))
+  }
+  task.resume()
+}
+
+public func sendSignup(username: String, email: String, password: String, cPassword: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
+
+  guard let url = URL(string: "http://localhost:3000/api/users/createUser") else {
+    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+    return
+  }
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  let signupData = SignupRequest(username: username, email: email, password: password, cPassword: cPassword)
   do {
     let jsonData = try JSONEncoder().encode(signupData)
     request.httpBody = jsonData
@@ -193,77 +260,6 @@ public func sendSignup(username: String, email: String, password: String, userID
     do {
       let signupResponse = try JSONDecoder().decode(SignupResponse.self, from: data)
       completion(.success(signupResponse))
-    } catch {
-      completion(.failure(error))
-    }
-  }
-  task.resume()
-}
-
-
-public func sendRestrictApp(userId: String, bundleId: String, dailyLimit: Int?, completion: @escaping (Result<RestrictAppResponse, Error>) -> Void) {
-  guard let url = URL(string: "http://localhost:3000/api/apps/restrict") else {
-    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
-    return
-  }
-  var request = URLRequest(url: url)
-  request.httpMethod = "POST"
-  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  let restrictData = RestrictAppRequest(userId: userId, bundleId: bundlId, dailyLimit: dailyLimit)
-  do {
-    let jsonData = try JSONEncoder().encode(restrictData)
-    request.httpBody = jsonData
-  } catch {
-    completion(.failure(error))
-    return
-  }
-  let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    if let error = error {
-      completion(.failure(error))
-      return
-    }
-    guard let data = data else {
-      completion(.failure(NSError(domain: "No data", code: 0)))
-      return
-    }
-    do {
-      let restrictResponse = try JSONDecoder().decode(RestrictAppResponse.self, from: data)
-      completion(.success(restrictResponse))
-    } catch {
-      completion(.failure(error))
-    }
-  }
-  task.resume()
-}
-
-public func updateAppRestriction(userId: String, bundleId: String, newdailyLimit: Int?, completion: @escaping (Result<UpdateRestrictionResponse, Error>) -> Void) {
-  guard let url = URL(string: "http://localhost:3000/api/apps/updateRestriction") else {
-    completion(.failure(NSError(domain: "Invalid URL", code: 0)))
-    return
-  }
-  var request = URLRequest(url: url)
-  request.httpMethod = "PUT"
-  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  let updateData = UpdateRestrictionRequest(userId: userId, bundleId: bundleId, newdailyLimit: newdailyLimit)
-  do {
-    let jsonData = try JSONEncoder().encode(updateData)
-    request.httpBody = jsonData
-  } catch {
-    completion(.failure(error))
-    return
-  }
-  let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    if let error = error {
-      completion(.failure(error))
-      return
-    }
-    guard let data = data else {
-      completion(.failure(NSError(domain: "No data", code: 0)))
-      return
-    }
-    do {
-      let updateResponse = try JSONDecoder().decode(UpdateRestrictionResponse.self, from: data)
-      completion(.success(updateResponse))
     } catch {
       completion(.failure(error))
     }
