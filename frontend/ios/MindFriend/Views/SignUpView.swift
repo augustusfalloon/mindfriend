@@ -106,8 +106,7 @@ struct SignUpView: View {
             sendSignup(
                 username: username,
                 email: email,
-                password: password,
-                cPassword: confirmPassword
+                password: password
             ) { result in
                 switch result {
                 case .success(let response):

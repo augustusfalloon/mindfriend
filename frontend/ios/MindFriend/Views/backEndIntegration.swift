@@ -22,11 +22,10 @@ public struct SignupRequest: Codable {
     let username: String
     let email: String
     let password: String
-    let cPassword: String
 }
 
 public struct SignupResponse: Codable {
-    let success: Bool?
+    let token: String?
     let error: String?
 }
 
@@ -231,18 +230,22 @@ func addFriend(userId: String, completion: @escaping (Result<Bool, Error>) -> Vo
   task.resume()
 }
 
-public func sendSignup(username: String, email: String, password: String, cPassword: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
+public func sendSignup(username: String, email: String, password: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
 
-  guard let url = URL(string: "http://localhost:3000/api/users/createUser") else {
+  guard let url = URL(string: "http://localhost:3000/api/users") else {
     completion(.failure(NSError(domain: "Invalid URL", code: 0)))
     return
   }
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  let signupData = SignupRequest(username: username, email: email, password: password, cPassword: cPassword)
+  let signupData = SignupRequest(username: username, email: email, password: password)
   do {
     let jsonData = try JSONEncoder().encode(signupData)
+    print("Signup Request Data:")
+    if let jsonString = String(data: jsonData, encoding: .utf8) {
+        print(jsonString)
+    }
     request.httpBody = jsonData
   } catch {
     completion(.failure(error))
@@ -258,7 +261,11 @@ public func sendSignup(username: String, email: String, password: String, cPassw
       return
     }
     do {
+      print("Raw data received:")
+      print(String(data: data, encoding: .utf8) ?? "Unable to convert data to string")
+      print("Attempting to decode...")
       let signupResponse = try JSONDecoder().decode(SignupResponse.self, from: data)
+      print("after")
       completion(.success(signupResponse))
     } catch {
       completion(.failure(error))
