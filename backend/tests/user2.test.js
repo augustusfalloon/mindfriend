@@ -1,10 +1,15 @@
 const mongoose = require('mongoose');
 const assert = require('assert');
 const User = require('../src/models/user.js');
+const App = require('../src/models/app.js');
 const {connectToDatabase, disconnectFromDatabase} = require("../src/services/databaseService");
 
-async function clearDatabase() {
+async function clearDatabaseUser() {
     await User.deleteMany();
+}
+
+async function clearDatabaseApp() {
+    await App.deleteMany();
 }
 
 
@@ -15,10 +20,12 @@ async function runTests() {
     
     await connectToDatabase();
 
-    await clearDatabase();
+    await clearDatabaseUser();
+
+    await clearDatabaseApp();
     
 
-    const user = await User.create({email: 'Alice Johnson', username: 'alicej', userID: 'user123', passwordHash: 'someHashedPassword' });
+    const user = await User.create({email: 'Alice Johnson', username: 'Alicej', userID: 'user123', passwordHash: 'someHashedPassword' });
     await user.save();
 
     await user.restrictApp('com.foo', 60);
@@ -48,8 +55,9 @@ async function runTests() {
     assert.strictEqual(app2.getRemaining(0), 80);
     assert.strictEqual(app2.getRemaining(150), -70);
     assert.strictEqual(app2.hasExceeded(49), false);
-      assert.strictEqual(app2.hasExceeded(50), false);
-      assert.strictEqual(app2.hasExceeded(100), true);
+    assert.strictEqual(app2.hasExceeded(50), false);
+    assert.strictEqual(app2.hasExceeded(100), true);
+
 
     await user.updateRestriction('com.foo', 20);
     const populatedUser3 = await User.findById(user._id).populate('restrictedApps');
@@ -62,6 +70,16 @@ async function runTests() {
     const app4 = populatedUser4.restrictedApps.find(app => app.bundleId === 'face.com');
     assert.ok(app4, "App with bundleId 'com.foo' should exist");
     assert.strictEqual(app4.restricted, true);
+
+    await user.addComment("face.com", "I messed up bad");
+    const populatedUser5 = await User.findById(user._id).populate('restrictedApps');
+    const app5 = populatedUser5.restrictedApps.find(app => app.bundleId ==='face.com');
+    assert.ok(app5, "App with bundleId 'com.foo' should exist");
+    console.log(app5.comments);
+    assert.strictEqual(app5.comments, "I messed up bad");
+
+    const exceeded = await user.getExceeded({"com.foo": 40, "face.com": 90});
+    console.log(exceeded);
 
     await disconnectFromDatabase();
 

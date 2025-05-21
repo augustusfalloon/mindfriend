@@ -1,9 +1,20 @@
 import SwiftUI
+import Combine
 
 struct FriendsView: View {
     @StateObject private var viewModel = FriendsViewModel()
     @State private var searchText = ""
     @State private var showingAddFriend = false
+    @State private var showError = false
+    @State private var errorMessage = ""
+
+    private func handleFriendRequest(_ request: String, accepted: Bool) {
+        if accepted {
+            viewModel.acceptFriendRequest(from: request)
+        } else {
+            viewModel.declineFriendRequest(from: request)
+        }
+    }
     
     var body: some View {
         NavigationView {
@@ -13,11 +24,7 @@ struct FriendsView: View {
                     Section(header: Text("Friend Requests")) {
                         ForEach(viewModel.pendingRequests, id: \.self) { request in
                             FriendRequestRow(request: request) { accepted in
-                                if accepted {
-                                    viewModel.acceptFriendRequest(from: request)
-                                } else {
-                                    viewModel.declineFriendRequest(from: request)
-                                }
+                                handleFriendRequest(request, accepted: accepted)
                             }
                         }
                     }
@@ -44,6 +51,15 @@ struct FriendsView: View {
             }
             .sheet(isPresented: $showingAddFriend) {
                 AddFriendView(viewModel: viewModel)
+            }
+            .alert("Error", isPresented: $showError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(errorMessage)
+            }
+            .onReceive(viewModel.$error.compactMap { $0 }) { newError in
+                errorMessage = newError
+                showError = true
             }
         }
     }

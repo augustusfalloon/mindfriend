@@ -6,8 +6,8 @@ const User = require('../models/user');
 const bcrypt = require('bcrypt');
 exports.createUser = async (req, res) => {
     try {
-        const { email, username, userID, password } = req.body;
-        if (!email || !username || !userID || !password) {
+        const { email, username, password } = req.body;
+        if (!email || !username || !password) {
             throw new Error('Missing required fields');
         }
         
@@ -19,7 +19,7 @@ exports.createUser = async (req, res) => {
         
         // hash the password
         const passwordHash = await bcrypt.hash(password, 10);
-        const newUser = new User({ email, username, userID, passwordHash, restrictedApps: [], friends: [] });
+        const newUser = new User({ email, username, passwordHash, restrictedApps: [], friends: [] });
         await newUser.save();
         res.status(201).json(newUser);
     } catch (error) {
@@ -29,8 +29,8 @@ exports.createUser = async (req, res) => {
 // restrict an app for a user
 exports.restrictApp = async (req, res) => {
     try {
-        const { userID, bundleID, dailyUsage } = req.body;
-        const user = await User.findOne({ userID });
+        const { _id, bundleID, dailyUsage } = req.body;
+        const user = await User.findById({ _id });
         if (!user) throw new Error('User not found.');
 
         await user.restrictApp(bundleID, dailyUsage);
@@ -73,11 +73,28 @@ exports.toggleRestriciton = async (req, res) => {
     }
 }
 
+exports.getElapsed = async (req, res) => {
+    try {
+        let pd = [];
+        const {userID} = req.body;
+        const user = await User.findOne({userID});
+        await user.populate('restrictedApps');
+        for (const app of user.restrictedApps) {
+            if (app.dailyUsage < 0) {
+                pd.push(app);
+            }
+        }
+        res.status(200).json(pd);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 // add friend
 exports.addFriend = async (req, res) => {
     try {
-        const { userID, friendID } = req.body;
-        const user = await User.findOne({ userID });
+        const { username, friendID } = req.body;
+        const user = await User.findOne({ username });
         if (!user) throw new Error('User not found.');
   
         await user.addFriend(friendID);
@@ -92,12 +109,40 @@ exports.addFriend = async (req, res) => {
 // get a user's profile by userID
 exports.getUserProfile = async (req, res) => {
     try {
-        const { userID } = req.params;
-        const user = await User.findOne({ userID });
+        const { username } = req.params;
+        const user = await User.findOne({ username });
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
         res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.addComment = async (req, res) => {
+    try {
+        const { username, comment, bundleID } = req.params;
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        await user.addComment(comment, bundleID);
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.getExceeded = async (req, res) => {
+    try {
+        const {usage, username} = req.params;
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        await user.getExceeded(usage);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -136,4 +181,52 @@ exports.login = async (req, res) => {
 // cursory logout - should be handled on client side 
 exports.logout = async (req, res) => {
     return res.status(200).json({ message: 'Logout successful' });
+};
+
+/**
+ * Get all app restrictions and their associated times for a user.
+ */
+exports.getAppRestrictions = async (req, res) => {
+  try {
+    const { userID } = req.params;
+    const user = await User.findOne({ userID });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    res.status(200).json({ restrictedApps: user.restrictedApps });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Get all friends for a user.
+ */
+exports.getFriends = async (req, res) => {
+  try {
+    const { userID } = req.params;
+    const user = await User.findOne({ userID });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    res.status(200).json({ friends: user.friends });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Get all user data (excluding sensitive info like passwordHash).
+ */
+exports.getUserData = async (req, res) => {
+  try {
+    const { userID } = req.params;
+    const user = await User.findOne({ userID }).select('-passwordHash -__v -_id');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };

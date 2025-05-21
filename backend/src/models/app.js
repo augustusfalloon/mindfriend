@@ -7,7 +7,9 @@ const AppSchema = new mongoose.Schema({
   bundleId: { type: String, required: true }, // App's bundle ID
   dailyUsage: { type: Number, required: true }, // Daily usage limit in minutes
   restricted: { type: Boolean, default: false }, // Whether the app is restricted
+  comments: {type: String, default: false},
 });
+
 
 AppSchema.statics.createApp = async function (params) {
     console.log('params: ', params);
@@ -40,6 +42,15 @@ AppSchema.methods.hasExceeded = function (usageMin) {
     }
     return false;
 };
+
+
+AppSchema.methods.addComment = async function (comment) {
+    if (!comment) {
+        throw new Error('You must add a reason');
+    }
+    this.comments = comment;
+    return await this.save();
+}
 
 const App = mongoose.model('App', AppSchema);
 module.exports = App;
