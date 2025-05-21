@@ -3,6 +3,7 @@ import SwiftUI
 
 @main
 struct MindFriendApp: App {
+    @StateObject private var context = AppContext()
     
     init() {
 //        Task {
