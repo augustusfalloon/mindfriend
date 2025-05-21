@@ -95,7 +95,7 @@ struct SignUpView: View {
         print("Attempting signup with username: \(username), email: \(email)")
         
         isLoading = true
-        defer { 
+        defer {
             isLoading = false
             print("Signup process completed")
         }
@@ -138,4 +138,4 @@ struct SignUpView: View {
 }
 #Preview {
     SignUpView(onSignUpSuccess: { _ in })
-} 
+}
