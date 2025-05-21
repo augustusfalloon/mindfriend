@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
     friends: [{ type: String }], // list of userIDs (string references)
 });
 
-userSchema.statics.createNewUser = async function({ email, username, userID }) {
+userSchema.statics.createNewUser = async function({ email, username, userID , password}) {
   if (!email || !username || !userID) {
     throw new Error('Missing required fields: email, username, or userID');
   }
@@ -81,15 +81,28 @@ userSchema.methods.toggleRestriction = async function(bundleId) {
     return existingApp;
 };
 
-userSchema.methods.addFriend = function(userID) {
+userSchema.methods.addFriend = async function(userID) {
     if (!userID || typeof userID !== 'string') {
         throw new Error('Invalid userID');
     }
     if (!this.friends.includes(userID)) {
       this.friends.push(userID);
     }
-    return this.save();
+    return await this.save();
 };
+
+userSchema.methods.addComment = async function(bundleId, comment) {
+    if (!bundleId || typeof bundleId !== 'string') {
+        throw new Error('Invalid appID');
+    }
+    await this.populate("restrictedApps");
+    const existingApp = this.restrictedApps.find(app => app.bundleId === bundleId);
+    if (!existingApp) {
+        throw new Error("No bundle ID exists");
+    }
+    await existingApp.addComment(comment);
+    return await existingApp.save();
+}
 
 const User = mongoose.model('User', userSchema);
 
