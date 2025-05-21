@@ -8,7 +8,7 @@ This repository contains both the iOS frontend and Node.js backend for the MindF
 
 ## Frontend (iOS App)
 
-### Final Features
+### Functionality description (1.2.2)
 - User authentication 
 - App usage tracking and restrictions
 - Social accountability through friend connections
@@ -19,12 +19,15 @@ This repository contains both the iOS frontend and Node.js backend for the MindF
 - SwiftUI for modern UI development
 - iOS 15.0+ support
 - MVVM architecture
-
-### Frontend Testing
+- 
+## Frontend Tutorial (1.2.3):
+### Installation and Testing (1.2.1)
 1. Navigate to the `frontend/ios` directory
 2. Open `MindFriend.xcodeproj` in Xcode
 3. Hit the run button in Xcode, make sure iOS simulator is installed
-4. To run tests, open project in Xcode and hit command u
+
+*(1.2.4) Note: you may face issues if you try to enter non-integers as times when creating a new general time bound restriction or app-specific restrictions
+6. To run tests, open project in Xcode and hit command u
 
 ## Acceptance Tests For TA
 
@@ -48,7 +51,8 @@ Currently in initial development phase with basic UI
 components implemented. Otherwise, Milestone 3A was 
 followed closely.
 
-### Getting Started
+## Backend Tutorial (1.2.3):
+### Installation Guide (1.2.1)
 1. Navigate to the `backend` directory
 2. Run `npm install` to download all relevant packages
 3. Start the server with `npm start`
