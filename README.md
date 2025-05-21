@@ -143,7 +143,7 @@ Gamification, analytics dashboards, and AI-based habit prediction:
 
 ### Structure 
 This is a general first idea of how we can structure our project.
-
+```
 mindfriend/
 ├── frontend/                      # iOS App (Swift)
 │   ├── Models/
@@ -182,3 +182,4 @@ mindfriend/
 │
 ├── README.md
 └── .gitignore
+```
