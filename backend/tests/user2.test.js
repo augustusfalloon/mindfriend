@@ -78,6 +78,9 @@ async function runTests() {
     console.log(app5.comments);
     assert.strictEqual(app5.comments, "I messed up bad");
 
+    const exceeded = await user.getExceeded({"com.foo": 40, "face.com": 90});
+    console.log(exceeded);
+
     await disconnectFromDatabase();
 
 }

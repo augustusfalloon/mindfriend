@@ -29,6 +29,8 @@ router.post('/login', userController.login);
 router.post('/logout', userController.logout);
 
 // POST /api/users/add-comment
-router.post('/add-comment');
+router.post('/add-comment', userController.addComment);
+
+router.get('/exceeded', userController.getExceeded);
 
 module.exports = router;
