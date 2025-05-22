@@ -3,7 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 
 // POST /api/users → Create new user
-router.post('/', userController.createNewUser);
+router.post('/', userController.createUser);
 
 // POST /api/users/restrict-app → Restrict an app
 router.post('/restrict-app', userController.restrictApp);

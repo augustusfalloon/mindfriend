@@ -19,7 +19,7 @@ exports.createUser = async (req, res) => {
         
         // hash the password
         const passwordHash = await bcrypt.hash(password, 10);
-        const newUser = new User({ email, username, passwordHash, restrictedApps: [], friends: [] });
+        const newUser = await User.createNewUser(email, username, passwordHash);
         await newUser.save();
         res.status(201).json(newUser);
     } catch (error) {
