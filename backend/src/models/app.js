@@ -14,6 +14,7 @@ const AppSchema = new mongoose.Schema({
 AppSchema.statics.createApp = async function (params) {
     console.log('params: ', params);
   if (!params.userId || !params.bundleId || !params.dailyUsage) {
+    console.log(`${params.userId}, ${params.bundleId}, ${params.dailyUsage}`);
     throw new Error('All fields are required to create an app');
   }
   if (typeof params.dailyUsage != 'number') {

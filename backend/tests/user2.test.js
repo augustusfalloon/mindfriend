@@ -25,7 +25,7 @@ async function runTests() {
     await clearDatabaseApp();
     
 
-    const user = await User.create({email: 'Alice Johnson', username: 'Alicej', userID: 'user123', passwordHash: 'someHashedPassword' });
+    const user = await User.createNewUser({email: 'Alice Johnson', username: 'Alicej', passwordHash: 'someHashedPassword' });
     await user.save();
 
     await user.restrictApp('com.foo', 60);
@@ -81,6 +81,11 @@ async function runTests() {
     const exceeded = await user.getExceeded({"com.foo": 40, "face.com": 90});
     console.log(exceeded);
 
+
+    const user2 = await User.create({email: 'stuff', username: 'stuff', userID: 'stuff', passwordHash: 'stuff' });
+    await user.addFriend(user2.username) 
+    console.log(user.friends);
+    console.log(user.friends.length);
     await disconnectFromDatabase();
 
 }

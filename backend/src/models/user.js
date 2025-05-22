@@ -13,16 +13,28 @@ const userSchema = new mongoose.Schema({
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // list of userIDs (string references)
 });
 
-userSchema.statics.createNewUser = async function({email, username , password}) {
-    console.log(`${email}, ${password}, ${username}`);
-  if (!email || !username || !password) {
+userSchema.statics.createNewUser = async function({email, username , passwordHash}) {
+    console.log(`${email}, ${passwordHash}, ${username}`);
+  if (!email || !username || !passwordHash) {
     throw new Error('Missing required fields: email, username, or password');
   }
   const existingUser = await this.findOne({ username });
   if (existingUser) {
     throw new Error('Username already exists');
   }
-  const newUser = new this({ email, username, userID });
+  const newUser = new this({ email, username, passwordHash});
+
+  //Instagram Youtube, Facebook, TikTok, Twitter, Snapchat, Reddit, Pinterest
+
+  const insta = await App.createApp({ userId: newUser._id, bundleId: "instagra", dailyUsage: 1});
+  const youtube = await App.createApp({userId: newUser._id, bundleId: "youtube", dailyUsage: 1});
+  const facebook = await App.createApp({userId: newUser._id, bundleId: "facebook", dailyUsage: 1});
+  const tiktok = await App.createApp({userId: newUser._id, bundleId: "tiktok", dailyUsage: 1});
+  const twitter = await App.createApp({userId: newUser._id, bundleId: "twitter", dailyUsage: 1});
+  const snapchat = await App.createApp({userId: newUser._id, bundleId: "snapchat", dailyUsage: 1});
+  const reddit = await App.createApp({userId: newUser._id, bundleId: "reddit", dailyUsage: 1});
+  const pinterest = await App.createApp({userId: newUser._id, bundleId: "pinterest", dailyUsage: 1});
+  
   return newUser.save();
 };
 
