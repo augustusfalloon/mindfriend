@@ -212,7 +212,7 @@ func addFriend(userId: String, friendId: String, completion: @escaping (Result<B
   request.httpMethod = "POST"
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
   let body: [String: Any] = [
-    "userId": userId
+    "userId": userId,
     "friendId": friendId
   ]
   do {
