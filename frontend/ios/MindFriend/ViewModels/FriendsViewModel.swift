@@ -7,14 +7,15 @@ class FriendsViewModel: ObservableObject {
     @Published var searchResults: [String] = []
     @Published var error: String?
     @Published var foundUser: String?
-    
-    private var cancellables = Set<AnyCancellable>()
-    
-    init() {
-        // Load initial data
+
+
+    init(){
         loadFriends()
         loadPendingRequests()
     }
+    
+    private var cancellables = Set<AnyCancellable>()
+    
     
     func loadFriends() {
         // TODO: Implement API call to load friends
@@ -95,9 +96,11 @@ class FriendsViewModel: ObservableObject {
     }
     
     // Placeholder for adding a friend -> Implementing actual call with dummy data
-    func addFriendButton(username: String) async {
-        print("Attempting to add friend: \(username)")
-        
+    func addFriendButton(userId: String, friendId: String) async {
+    //func addFriendButton(userId: String) async {
+        print("Attempting to add friend: \(userId)")
+
+    
         // Create a continuation to handle the async completion
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             print("Sending add friend request to backend...")
@@ -106,7 +109,7 @@ class FriendsViewModel: ObservableObject {
             // In a real scenario, 'userId' should be the current user's ID, and 'friendID' should be the username to add.
             addFriend(
                 userId: "jean",   // Dummy current user ID
-                friendId: "tantawy" // Dummy friend ID to add (replace with 'username' parameter later)
+                friendId: "Alicej" // Dummy friend ID to add (replace with 'username' parameter later)
             ) { result in
                 DispatchQueue.main.async {
                     switch result {

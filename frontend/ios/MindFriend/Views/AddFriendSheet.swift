@@ -38,7 +38,12 @@ struct AddFriendSheet: View {
                 Button(action: {
                     Task {
                         //await viewModel.searchForUser(username: searchText)
-                        await viewModel.addFriendButton(username: searchText)
+                        if let currentUser = appContext.user {
+                            await viewModel.addFriendButton(userId: currentUser.username, friendId: searchText)
+                        } else{
+                            Text("User is not lgoged in.")
+                        }
+                        //await viewModel.addFriendButton(userId: appContext.user.username, friendId: searchText)
                     }
                 }) {
                     Text("Search User")
