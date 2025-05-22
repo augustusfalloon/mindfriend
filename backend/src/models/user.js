@@ -99,7 +99,7 @@ userSchema.methods.addFriend = async function(username) {
     }
 
     this.friends.push(friend._id);
-    friend.friends.push(this._id);
+    // friend.friends.push(this._id);
 
 
     return await this.save();
