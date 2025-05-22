@@ -78,12 +78,14 @@ struct LoginView: View {
             }
             .fullScreenCover(isPresented: $isLoggedIn) {
                 MainTabView()
+                    .environmentObject(appContext)
             }
             .sheet(isPresented: $showingSignUp) {
                 SignUpView(onSignUpSuccess: { message in
                     successMessage = message
                     showingSuccessAlert = true
                 })
+                .environmentObject(appContext)
             }
         }
     }

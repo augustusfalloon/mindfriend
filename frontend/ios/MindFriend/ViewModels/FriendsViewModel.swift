@@ -105,8 +105,8 @@ class FriendsViewModel: ObservableObject {
             // Calling the backend addFriend function with dummy data as requested
             // In a real scenario, 'userId' should be the current user's ID, and 'friendID' should be the username to add.
             addFriend(
-                //userId: "jean",   // Dummy current user ID
-                userId: "tantawy" // Dummy friend ID to add (replace with 'username' parameter later)
+                userId: "jean",   // Dummy current user ID
+                friendId: "tantawy" // Dummy friend ID to add (replace with 'username' parameter later)
             ) { result in
                 DispatchQueue.main.async {
                     switch result {

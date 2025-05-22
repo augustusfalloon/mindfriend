@@ -52,6 +52,7 @@ struct FriendsView: View {
             }
             .sheet(isPresented: $showingAddFriend) {
                 AddFriendSheet(viewModel: viewModel)
+                    .environmentObject(appContext)
             }
             .alert("Error", isPresented: $showError) {
                 Button("OK", role: .cancel) { }
