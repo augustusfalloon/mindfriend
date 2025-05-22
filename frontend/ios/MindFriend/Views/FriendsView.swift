@@ -30,7 +30,6 @@ struct FriendsView: View {
                         }
                     }
                 }
-                
                 // Friends List Section
                 Section(header: Text("Friends")) {
                     ForEach(viewModel.friends, id: \.self) { friend in
@@ -53,6 +52,7 @@ struct FriendsView: View {
             }
             .sheet(isPresented: $showingAddFriend) {
                 AddFriendSheet(viewModel: viewModel)
+                    .environmentObject(appContext)
             }
             .alert("Error", isPresented: $showError) {
                 Button("OK", role: .cancel) { }
