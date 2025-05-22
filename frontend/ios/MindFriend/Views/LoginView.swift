@@ -11,6 +11,7 @@ struct LoginView: View {
     @State private var isLoading = false
     @State private var showingSuccessAlert = false
     @State private var successMessage: String = ""
+    @EnvironmentObject var appContext: AppContext
     
     var body: some View {
         NavigationView {
@@ -113,6 +114,11 @@ struct LoginView: View {
                         // Success case - store token and proceed
                         DispatchQueue.main.async {
                             UserDefaults.standard.set(token, forKey: "authToken")
+                            // Update AppContext with an AppUser object
+                            self.appContext.isLoggedIn = true
+                            // Here, you should fetch the full user object from your backend. For now, we'll construct a dummy AppUser:
+                            let user = AppUser(id: UUID().uuidString, email: "", username: self.username, restrictedApps: [], friends: [])
+                            self.appContext.user = user
                             self.isLoggedIn = true
                         }
                     } else {

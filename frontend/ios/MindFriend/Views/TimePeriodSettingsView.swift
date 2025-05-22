@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct TimePeriodSettingsView: View {
+    @EnvironmentObject var appContext: AppContext
     @StateObject private var viewModel = TimePeriodViewModel()
     
     var body: some View {

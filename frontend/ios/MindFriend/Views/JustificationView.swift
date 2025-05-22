@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct JustificationView: View {
+    @EnvironmentObject var appContext: AppContext
     let appName: String
     let onJustificationSubmitted: (String) -> Void
     let onWaitSelected: () -> Void

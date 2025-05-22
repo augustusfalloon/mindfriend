@@ -4,6 +4,7 @@ import Combine
 
 struct AddFriendSheet: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var appContext: AppContext
     @ObservedObject var viewModel: FriendsViewModel
     @State private var searchText = ""
     @State private var isSearching = false

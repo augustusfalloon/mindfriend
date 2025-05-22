@@ -1,12 +1,14 @@
 import SwiftUI
 
 struct FeedView: View {
+    @EnvironmentObject var appContext: AppContext
     @StateObject private var viewModel = FeedViewModel()
     @State private var showingReasonSheet = false
     @State private var selectedApp = ""
     @State private var reason = ""
     
     var body: some View {
+        
         NavigationView {
             ZStack {
                 List {
@@ -17,6 +19,9 @@ struct FeedView: View {
                 .navigationTitle("Friend Activity")
                 .refreshable {
                     await viewModel.loadActivities()
+                }
+                .onAppear {
+                    print(appContext.user)
                 }
                 
                 VStack {
@@ -52,7 +57,7 @@ struct FeedView: View {
                         
                         Section {
                             Button(action: {
-                                viewModel.addActivity(appName: selectedApp, justification: reason)
+                                viewModel.addActivity(appName: selectedApp, justification: reason, appContext: appContext)
                                 showingReasonSheet = false
                                 selectedApp = ""
                                 reason = ""
@@ -134,10 +139,10 @@ class FeedViewModel: ObservableObject {
         ]
     }
     
-    func addActivity(appName: String, justification: String) {
+    func addActivity(appName: String, justification: String, appContext: AppContext) {
         let newActivity = FriendActivity(
-            friendId: "currentUser", // TODO: Get actual user ID
-            friendName: "You", // TODO: Get actual username
+            friendId: appContext.user?.id ?? "",
+            friendName: appContext.user?.username ?? "You",
             appName: appName,
             justification: justification
         )

@@ -4,5 +4,5 @@ import Combine
 
 class AppContext: ObservableObject {
     @Published var isLoggedIn: Bool = false
-    @Published var currentUser: String? = nil
+    @Published var user: AppUser? = nil
 }

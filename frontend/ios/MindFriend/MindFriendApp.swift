@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 @main
@@ -19,6 +18,7 @@ struct MindFriendApp: App {
     var body: some Scene {
         WindowGroup {
             LoginView()
+                .environmentObject(context)
         }
     }
 }

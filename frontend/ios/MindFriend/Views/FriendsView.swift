@@ -2,6 +2,7 @@ import SwiftUI
 import Combine
 
 struct FriendsView: View {
+    @EnvironmentObject var appContext: AppContext
     @StateObject private var viewModel = FriendsViewModel()
     @State private var searchText = ""
     @State private var showingAddFriend = false
@@ -17,7 +18,7 @@ struct FriendsView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 // Friend Requests Section
                 if !viewModel.pendingRequests.isEmpty {
@@ -46,11 +47,12 @@ struct FriendsView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAddFriend = true }) {
                         Image(systemName: "person.badge.plus")
+                            .foregroundColor(.blue)
                     }
                 }
             }
             .sheet(isPresented: $showingAddFriend) {
-                AddFriendView(viewModel: viewModel)
+                AddFriendSheet(viewModel: viewModel)
             }
             .alert("Error", isPresented: $showError) {
                 Button("OK", role: .cancel) { }
@@ -146,4 +148,4 @@ struct AddFriendView: View {
 
 #Preview {
     FriendsView()
-} 
+}
