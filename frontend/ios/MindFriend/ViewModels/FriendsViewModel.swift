@@ -7,14 +7,17 @@ class FriendsViewModel: ObservableObject {
     @Published var searchResults: [String] = []
     @Published var error: String?
     @Published var foundUser: String?
-    
-    private var cancellables = Set<AnyCancellable>()
-    
-    init() {
-        // Load initial data
+
+    private let userManager: UserManager
+
+    init(userManager: UserManager = .shared){
+        self.userManager = userManager
         loadFriends()
         loadPendingRequests()
     }
+    
+    private var cancellables = Set<AnyCancellable>()
+    
     
     func loadFriends() {
         // TODO: Implement API call to load friends
@@ -97,6 +100,14 @@ class FriendsViewModel: ObservableObject {
     // Placeholder for adding a friend -> Implementing actual call with dummy data
     func addFriendButton(username: String) async {
         print("Attempting to add friend: \(username)")
+
+        guard let currentUserId = userManager.currentUser?.id else {
+            self.error = "Current user not logged in."
+            print("Error: Current user ID not available for adding friend.")
+            return
+        }
+
+        print("Current user ID \(currentUserId) attempting to add friend: \(username)")
         
         // Create a continuation to handle the async completion
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
@@ -106,7 +117,7 @@ class FriendsViewModel: ObservableObject {
             // In a real scenario, 'userId' should be the current user's ID, and 'friendID' should be the username to add.
             addFriend(
                 userId: "jean",   // Dummy current user ID
-                friendId: "tantawy" // Dummy friend ID to add (replace with 'username' parameter later)
+                friendId: "tantawy1" // Dummy friend ID to add (replace with 'username' parameter later)
             ) { result in
                 DispatchQueue.main.async {
                     switch result {

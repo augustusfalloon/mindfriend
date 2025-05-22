@@ -98,7 +98,7 @@ exports.addFriend = async (req, res) => {
         if (!user) throw new Error('User not found.');
   
         await user.addFriend(friendID);
-        await user.save();
+        //await user.save();
 
         res.status(200).json({ message: 'Friend added successfully.' });
     } catch (error) {
