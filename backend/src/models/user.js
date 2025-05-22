@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // list of userIDs (string references)
 });
 
-userSchema.statics.createNewUser = async function({email, username , passwordHash}) {
+userSchema.statics.createNewUser = async function(email, username , passwordHash) {
     console.log(`${email}, ${passwordHash}, ${username}`);
   if (!email || !username || !passwordHash) {
     throw new Error('Missing required fields: email, username, or password');
