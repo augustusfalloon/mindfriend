@@ -34,6 +34,42 @@ struct AddFriendSheet: View {
                 .padding()
                 .background(Color(.systemBackground))
 
+                // Search User Button
+                Button(action: {
+                    Task {
+                        //await viewModel.searchForUser(username: searchText)
+                        await viewModel.addFriendButton(username: searchText)
+                    }
+                }) {
+                    Text("Search User")
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal)
+
+                // Display Search Result and Add Friend Button
+                // if let foundUser = viewModel.foundUser {
+                //     HStack {
+                //         Text("Found User:")
+                //             .font(.headline)
+                //         Text(foundUser)
+                //         Spacer()
+                //         Button("Add Friend") {
+                //             viewModel.addFriend(username: foundUser)
+                //         }
+                //         .buttonStyle(.bordered)
+                //     }
+                //     .padding()
+                // } else if viewModel.error != nil && !searchText.isEmpty {
+                //      // Show error if user not found after searching
+                //      Text(viewModel.error ?? "")
+                //          .foregroundColor(.red)
+                //          .padding()
+                // }
+
                 // Results List
                 if isSearching {
                     ProgressView("Searching...")

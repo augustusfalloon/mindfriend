@@ -30,7 +30,6 @@ struct FriendsView: View {
                         }
                     }
                 }
-                
                 // Friends List Section
                 Section(header: Text("Friends")) {
                     ForEach(viewModel.friends, id: \.self) { friend in
