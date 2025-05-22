@@ -13,14 +13,16 @@ const AppSchema = new mongoose.Schema({
 
 AppSchema.statics.createApp = async function (params) {
     console.log('params: ', params);
-  if (!params.userId || !params.bundleId || !params.dailyUsage) {
-    console.log(`${params.userId}, ${params.bundleId}, ${params.dailyUsage}`);
+  if (!params.userId || !params.bundleId) {
+    console.log(`${params.userId}, ${params.bundleId}`);
     throw new Error('All fields are required to create an app');
   }
-  if (typeof params.dailyUsage != 'number') {
+  console.log(params.dailyUsage);
+  let num = parseInt(params.dailyUsage);
+  if (typeof num != 'number') {
     throw new Error('Daily usage must be a number');
   }
-  const app = new this({ userId: params.userId, bundleId: params.bundleId, dailyUsage: params.dailyUsage, restricted: false });
+  const app = new this({ userId: params.userId, bundleId: params.bundleId, dailyUsage: num, restricted: false });
   return await app.save();
 };
 

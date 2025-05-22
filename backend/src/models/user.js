@@ -26,32 +26,28 @@ userSchema.statics.createNewUser = async function({email, username , passwordHas
 
   //Instagram Youtube, Facebook, TikTok, Twitter, Snapchat, Reddit, Pinterest
 
-  const insta = await App.createApp({ userId: newUser._id, bundleId: "instagra", dailyUsage: 1});
-  const youtube = await App.createApp({userId: newUser._id, bundleId: "youtube", dailyUsage: 1});
-  const facebook = await App.createApp({userId: newUser._id, bundleId: "facebook", dailyUsage: 1});
-  const tiktok = await App.createApp({userId: newUser._id, bundleId: "tiktok", dailyUsage: 1});
-  const twitter = await App.createApp({userId: newUser._id, bundleId: "twitter", dailyUsage: 1});
-  const snapchat = await App.createApp({userId: newUser._id, bundleId: "snapchat", dailyUsage: 1});
-  const reddit = await App.createApp({userId: newUser._id, bundleId: "reddit", dailyUsage: 1});
-  const pinterest = await App.createApp({userId: newUser._id, bundleId: "pinterest", dailyUsage: 1});
+  await newUser.restrictApp("instagram", 1);
+  await newUser.restrictApp( "youtube",  1);
+  await newUser.restrictApp("facebook", 1);
+  await newUser.restrictApp( "tiktok", 1);
+  await newUser.restrictApp("twitter", 1);
+  await newUser.restrictApp("snapchat", 1);
+  await newUser.restrictApp("reddit", 1);
+  await newUser.restrictApp("pinterest", 1);
   
   return newUser.save();
 };
 
 // will add logic in next iteration
 userSchema.methods.restrictApp = async function(bundleID, dailyUsage) {
-    if (!bundleID || typeof bundleID !== 'string') {
+    if (!bundleID) {
         throw new Error('Invalid bundleID');
-    }
-    const existingApp = await App.findOne({ userId: this._id, bundleId: bundleID });
-    if (existingApp && this.restrictedApps.findById(existingApp._id)) {
-        throw new Error('App is already added');
     }
     const newApp = await App.createApp({
         userId: this._id,
         bundleId: bundleID,
         dailyUsage: dailyUsage,
-        restricted: true,
+        restricted: false,
     });
 
   // Save the reference in the user's restrictedApps
