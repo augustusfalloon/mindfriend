@@ -12,6 +12,8 @@ router.post('/restrict-app', userController.restrictApp);
 router.patch('/update-restriction', userController.updateRestriction);
 
 
+router.get('/all-apps', userController.getApps);
+
 // patch
 router.patch('/toggle-restriciton', userController.toggleRestriciton);
 

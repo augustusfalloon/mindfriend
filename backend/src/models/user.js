@@ -139,6 +139,13 @@ userSchema.methods.getExceeded = async function(usage) {
     return pd;
 }
 
+userSchema.methods.getApps = async function() {
+
+    await this.populate("restrictedApps");
+
+    return this.restrictedApps;
+}
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

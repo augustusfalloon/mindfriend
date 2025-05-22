@@ -142,7 +142,23 @@ exports.getExceeded = async (req, res) => {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-        await user.getExceeded(usage);
+        const exceeded = user.getExceeded(usage);
+        res.status(200).json(exceeded);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.getApps = async(req, res) => {
+    try {
+        const {username} = req.params;
+        const user = await User.findOne({username});
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        const apps = user.getApps();
+        res.status(200).json(apps);
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
