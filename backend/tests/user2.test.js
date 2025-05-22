@@ -85,7 +85,7 @@ async function runTests() {
     console.log(exceeded);
 
 
-    const user2 = await User.create({email: 'stuff', username: 'stuff', userID: 'stuff', passwordHash: 'stuff' });
+    const user2 = await User.createNewUser({email: 'stuff', username: 'stuff', userID: 'stuff', passwordHash: 'stuff' });
     await user.addFriend(user2.username) 
     console.log(user.friends);
     console.log(user.friends.length);
