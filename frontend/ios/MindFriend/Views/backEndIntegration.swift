@@ -203,7 +203,7 @@ func updateRestriction(userId: String, bundleID: String, time: Int, completion: 
 }
 
 // Add a friend by userId (matches user.js: addFriend expects userId)
-func addFriend(userId: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+func addFriend(userId: String, friendId: String, completion: @escaping (Result<Bool, Error>) -> Void) {
   guard let url = URL(string: "http://localhost:3000/api/users/addFriend") else {
     completion(.failure(NSError(domain: "Invalid URL", code: 0)))
     return
@@ -213,6 +213,7 @@ func addFriend(userId: String, completion: @escaping (Result<Bool, Error>) -> Vo
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
   let body: [String: Any] = [
     "userId": userId
+    "friendId": friendId
   ]
   do {
     request.httpBody = try JSONSerialization.data(withJSONObject: body)
