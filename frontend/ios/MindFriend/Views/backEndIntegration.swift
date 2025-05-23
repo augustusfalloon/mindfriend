@@ -212,8 +212,8 @@ public func addFriend(userId: String, friendId: String, completion: @escaping (R
   request.httpMethod = "POST"
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
   let body: [String: Any] = [
-    "userId": userId,
-    "friendId": friendId
+    "username": userId,
+    "friendUsername": friendId
   ]
   do {
     request.httpBody = try JSONSerialization.data(withJSONObject: body)

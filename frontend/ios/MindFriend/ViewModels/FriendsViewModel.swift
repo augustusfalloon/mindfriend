@@ -96,36 +96,35 @@ class FriendsViewModel: ObservableObject {
     }
     
     // Placeholder for adding a friend -> Implementing actual call with dummy data
-    func addFriendButton(userId: String, friendId: String) async {
+    func addFriendButton(userId: String, friendId: String, completion: @escaping (Bool) -> Void) async {
     //func addFriendButton(userId: String) async {
-        print("Attempting to add friend: \(userId)")
-
+        print("Attempting to add friend: \(friendId)")
     
         // Create a continuation to handle the async completion
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             print("Sending add friend request to backend...")
             
-            // Calling the backend addFriend function with dummy data as requested
-            // In a real scenario, 'userId' should be the current user's ID, and 'friendID' should be the username to add.
-            addFriend(
-                userId: "jean",   // Dummy current user ID
-                friendId: "Alicej" // Dummy friend ID to add (replace with 'username' parameter later)
+            // Calling the backend addFriend function
+            MindFriend.addFriend(
+                userId: userId,
+                friendId: friendId
             ) { result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success(_):
-                        print("Add friend request sent successfully (dummy data).")
-                        // TODO: Handle successful add friend: e.g., show success message, refresh friends list, update UI in AddFriendSheet
+                        print("Add friend request sent successfully.")
+                        // Add the successfully added friend to the local friends list
+                        self.friends.append(friendId)
                         self.error = nil // Clear any previous error
-                        // You might want to dismiss the sheet here or show a confirmation
+                        completion(true) // Indicate success
                         
                     case .failure(let backendError):
-                        print("Add friend request failed (dummy data): \(backendError.localizedDescription)")
-                        // TODO: Handle add friend failure: e.g., show error message to user
+                        print("Add friend request failed: \(backendError.localizedDescription)")
                         self.error = "Failed to add friend: \(backendError.localizedDescription)"
+                        completion(false) // Indicate failure
                     }
                 }
-                continuation.resume()
+                continuation.resume() // Resume the async task after handling the result
             }
         }
     }

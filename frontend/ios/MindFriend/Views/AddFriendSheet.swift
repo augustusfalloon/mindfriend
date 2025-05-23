@@ -39,9 +39,17 @@ struct AddFriendSheet: View {
                     Task {
                         //await viewModel.searchForUser(username: searchText)
                         if let currentUser = appContext.user {
-                            await viewModel.addFriendButton(userId: currentUser.username, friendId: searchText)
+                            await viewModel.addFriendButton(userId: currentUser.username, friendId: searchText) { success in
+                                if success {
+                                    // Dismiss the sheet on successful friend addition
+                                    dismiss()
+                                }
+                                // ViewModel handles showing error message on failure
+                            }
                         } else{
-                            Text("User is not lgoged in.")
+                           // This case should ideally be prevented by disabling the button,
+                           // but adding an explicit error message here as a fallback.
+                            viewModel.error = "User is not logged in."
                         }
                         //await viewModel.addFriendButton(userId: appContext.user.username, friendId: searchText)
                     }
