@@ -367,7 +367,7 @@ public func getFeed(username: String, completion: @escaping (Result<[FriendApps]
             let dispatchGroup = DispatchGroup()
             var friendAppsResults: [FriendApps] = []
             var encounteredError: Error?
-            
+
             for friendUsername in friendsList {
                 print("\nFetching exceeded apps for friend: \(friendUsername)")
                 dispatchGroup.enter()

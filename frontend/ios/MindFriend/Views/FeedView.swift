@@ -128,7 +128,7 @@ class FeedViewModel: ObservableObject {
                     for app in friendApps.apps {
                         let activity = FriendActivity(
                             friendId: app.userId,
-                            friendName: app.userId, // Using userId as name since that's what we have
+                            friendName: friendApps.username, // Using userId as name since that's what we have
                             appName: app.bundleId,
                             justification: app.comments ?? "No reason provided"
                         )
@@ -180,18 +180,30 @@ struct ActivityRow: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(activity.appName)
-                .font(.headline)
-            Text(activity.justification)
+            HStack {
+                Image(systemName: "person.circle.fill")
+                    .foregroundColor(.blue)
+                Text(activity.friendName)
+                    .font(.headline)
+                Spacer()
+                Text(activity.timestamp, style: .relative)
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            
+            Text("Used \(activity.appName)")
                 .font(.subheadline)
-                .foregroundColor(.gray)
-            Text(activity.timestamp, style: .relative)
-                .font(.caption)
-                .foregroundColor(.gray)
+            
+            if !activity.justification.isEmpty {
+                Text(activity.justification)
+                    .font(.body)
+                    .padding(.vertical, 4)
+            }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
     }
 }
+
 
 #Preview {
     FeedView()
