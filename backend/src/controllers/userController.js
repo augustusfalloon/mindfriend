@@ -225,12 +225,13 @@ exports.getAppRestrictions = async (req, res) => {
  */
 exports.getFriends = async (req, res) => {
   try {
-    const { userID } = req.params;
-    const user = await User.findOne({ userID });
+    const { username } = req.params;
+    const user = await User.findOne({ username });
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
     }
-    res.status(200).json({ friends: user.friends });
+    await user.populate("friends");
+    res.status(200).json( user.friends );
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

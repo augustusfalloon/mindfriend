@@ -36,4 +36,8 @@ router.post('/add-comment', userController.addComment);
 
 router.post('/exceeded', userController.getExceeded);
 
+router.get('/:username/friends', userController.getFriends);
+
+
+
 module.exports = router;

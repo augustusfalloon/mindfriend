@@ -91,4 +91,11 @@ describe('Basic route test', () => {
         });
     expect(res.statusCode).toBe(200);
   });
+
+  it("testing new getfriends route", async() => {
+    const res = await request(baseURL)
+        .get("/api/users/test1/friends");
+    expect(res.statusCode).toBe(200);
+    expect(res.body[0].username).toBe('friend1');
+  })
 });

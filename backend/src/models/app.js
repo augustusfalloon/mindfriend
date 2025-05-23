@@ -7,7 +7,7 @@ const AppSchema = new mongoose.Schema({
   bundleId: { type: String, required: true }, // App's bundle ID
   dailyUsage: { type: Number, required: true }, // Daily usage limit in minutes
   restricted: { type: Boolean, default: false }, // Whether the app is restricted
-  comments: {type: String, default: false},
+  comments: {type: String, default: "None"},
 });
 
 
