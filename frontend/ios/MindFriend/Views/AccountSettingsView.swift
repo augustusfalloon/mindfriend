@@ -2,6 +2,8 @@ import SwiftUI
 
 struct AccountSettingsView: View {
     @EnvironmentObject var appContext: AppContext
+    @Environment(\.presentationMode) var presentationMode
+    
     var body: some View {
         NavigationView {
             List {
@@ -22,10 +24,15 @@ struct AccountSettingsView: View {
                 
                 Section {
                     Button(action: {
+                        print("Logout button clicked.")
                         // Logout action
                         appContext.isLoggedIn = false
                         appContext.user = nil
                         UserDefaults.standard.removeObject(forKey: "authToken")
+                        
+                        // Dismiss the current view (AccountSettingsView)
+                        presentationMode.wrappedValue.dismiss()
+                        
                     }) {
                         HStack {
                             Image(systemName: "arrow.right.square.fill")

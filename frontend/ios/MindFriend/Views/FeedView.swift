@@ -128,7 +128,7 @@ class FeedViewModel: ObservableObject {
                     for app in friendApps.apps {
                         let activity = FriendActivity(
                             friendId: app.userId,
-                            friendName: app.userId, // Using userId as name since that's what we have
+                            friendName: friendApps.username,
                             appName: app.bundleId,
                             justification: app.comments ?? "No reason provided"
                         )
@@ -161,17 +161,38 @@ class FeedViewModel: ObservableObject {
     
     func addComment(app: AppBackendModel, comment: String, appContext: AppContext) {
         guard let username = appContext.user?.username else { return }
-        addCommentToBackend(username: username, bundleID: app.bundleId, comment: comment) { [weak self] result in
+        
+        // Create the request body
+        let body: [String: Any] = [
+            "username": username,
+            "bundleID": app.bundleId,
+            "comment": comment
+        ]
+        
+        guard let url = URL(string: "http://localhost:3000/api/users/add-comment") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            self.error = error.localizedDescription
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    // Optionally reload exceeded apps to get updated comments
-                    self?.loadExceededApps(username: username)
-                case .failure(let error):
+                if let error = error {
                     self?.error = error.localizedDescription
+                    return
                 }
+                
+                // Reload exceeded apps to get updated comments
+                self?.loadExceededApps(username: username)
             }
         }
+        task.resume()
     }
 }
 
@@ -180,6 +201,9 @@ struct ActivityRow: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            Text(activity.friendName)
+                .font(.subheadline)
+                .foregroundColor(.blue)
             Text(activity.appName)
                 .font(.headline)
             Text(activity.justification)
