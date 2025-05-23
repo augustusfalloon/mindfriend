@@ -78,7 +78,7 @@ userSchema.methods.updateRestriction = async function(bundleId, time) {
       }
         await existingApp.save();
     } else {
-      throw new Error("No app found")
+      throw new Error("No app found");
     }
     return existingApp;
 };
