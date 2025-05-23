@@ -26,14 +26,14 @@ userSchema.statics.createNewUser = async function(email, username , passwordHash
 
   //Instagram Youtube, Facebook, TikTok, Twitter, Snapchat, Reddit, Pinterest
 
-  await newUser.restrictApp("instagram", 1);
-  await newUser.restrictApp( "youtube",  1);
-  await newUser.restrictApp("facebook", 1);
-  await newUser.restrictApp( "tiktok", 1);
-  await newUser.restrictApp("twitter", 1);
-  await newUser.restrictApp("snapchat", 1);
-  await newUser.restrictApp("reddit", 1);
-  await newUser.restrictApp("pinterest", 1);
+  await newUser.restrictApp("instagram", 0);
+  await newUser.restrictApp( "youtube",  0);
+  await newUser.restrictApp("facebook", 0);
+  await newUser.restrictApp( "tiktok", 0);
+  await newUser.restrictApp("twitter", 0);
+  await newUser.restrictApp("snapchat", 0);
+  await newUser.restrictApp("reddit", 0);
+  await newUser.restrictApp("pinterest", 0);
   
   return newUser.save();
 };
@@ -88,10 +88,8 @@ userSchema.methods.toggleRestriction = async function(bundleId) {
 };
 
 userSchema.methods.addFriend = async function(username) {
-    if (!username || typeof username !== 'string') {
-        throw new Error('Invalid userID');
-    }
 
+    console.log(username);
     const friend = await User.findOne({username: username});
 
     if (!friend) {

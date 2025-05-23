@@ -25,7 +25,7 @@ async function runTests() {
     await clearDatabaseApp();
     
 
-    const user = await User.createNewUser({email: 'Alice Johnson', username: 'Alicej', passwordHash: 'someHashedPassword' });
+    const user = await User.createNewUser('Alice@Johnson', 'Alicej','someHashedPassword' );
     await user.save();
     //create new user
 
@@ -85,7 +85,7 @@ async function runTests() {
     console.log(exceeded);
 
 
-    const user2 = await User.createNewUser({email: 'stuff', username: 'stuff', passwordHash: 'stuff' });
+    const user2 = await User.createNewUser('stuff', 'stuff','stuff' );
     await user.addFriend(user2.username) 
     console.log(user.friends);
     console.log(user.friends.length);

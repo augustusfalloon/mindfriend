@@ -93,12 +93,12 @@ exports.getElapsed = async (req, res) => {
 // add friend
 exports.addFriend = async (req, res) => {
     try {
-        const { userId, friendID } = req.body;
+        const { username, friendUsername } = req.body;
         console.log(req.body);
-        const user = await User.findOne({ userId });
+        const user = await User.findOne({ username });
         if (!user) throw new Error('User not found.');
   
-        await user.addFriend(friendID);
+        await user.addFriend(friendUsername);
         await user.save();
 
         res.status(200).json({ message: 'Friend added successfully.' });

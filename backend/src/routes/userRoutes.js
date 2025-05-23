@@ -6,6 +6,7 @@ const userController = require('../controllers/userController');
 router.post('/', userController.createUser);
 
 // POST /api/users/restrict-app → Restrict an app
+//WE SHOULD NEVER USE THIS, ONLY DO 
 router.post('/restrict-app', userController.restrictApp);
 
 // patch /api/users/update-restriction → Update restriction
