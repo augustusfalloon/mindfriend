@@ -3,144 +3,51 @@ import Combine
 
 struct FriendsView: View {
     @EnvironmentObject var appContext: AppContext
-    @StateObject private var viewModel = FriendsViewModel()
-    @State private var searchText = ""
+    @StateObject private var viewModel = MindFriend.FriendsViewModel()
     @State private var showingAddFriend = false
-    @State private var showError = false
-    @State private var errorMessage = ""
-
-    private func handleFriendRequest(_ request: String, accepted: Bool) {
-        if accepted {
-            viewModel.acceptFriendRequest(from: request)
-        } else {
-            viewModel.declineFriendRequest(from: request)
-        }
-    }
-    
-    var body: some View {
-        NavigationStack {
-            List {
-                // Friend Requests Section
-                if !viewModel.pendingRequests.isEmpty {
-                    Section(header: Text("Friend Requests")) {
-                        ForEach(viewModel.pendingRequests, id: \.self) { request in
-                            FriendRequestRow(request: request) { accepted in
-                                handleFriendRequest(request, accepted: accepted)
-                            }
-                        }
-                    }
-                }
-                // Friends List Section
-                Section(header: Text("Friends")) {
-                    ForEach(viewModel.friends, id: \.self) { friend in
-                        FriendRow(name: friend, status: "Active")
-                    }
-                }
-            }
-            .navigationTitle("Friends")
-            .searchable(text: $searchText, prompt: "Search friends")
-            .onChange(of: searchText) { newValue in
-                viewModel.searchFriends(query: newValue)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingAddFriend = true }) {
-                        Image(systemName: "person.badge.plus")
-                            .foregroundColor(.blue)
-                    }
-                }
-            }
-            .sheet(isPresented: $showingAddFriend) {
-                AddFriendSheet(viewModel: viewModel)
-                    .environmentObject(appContext)
-            }
-            .alert("Error", isPresented: $showError) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(errorMessage)
-            }
-            .onReceive(viewModel.$error.compactMap { $0 }) { newError in
-                errorMessage = newError
-                showError = true
-            }
-        }
-    }
-}
-
-struct FriendRow: View {
-    let name: String
-    let status: String
-    
-    var body: some View {
-        HStack {
-            Image(systemName: "person.circle.fill")
-                .foregroundColor(.blue)
-                .frame(width: 30)
-            Text(name)
-            Spacer()
-            Text(status)
-                .foregroundColor(status == "Active" ? .green : .gray)
-        }
-    }
-}
-
-struct FriendRequestRow: View {
-    let request: String
-    let onResponse: (Bool) -> Void
-    
-    var body: some View {
-        HStack {
-            Image(systemName: "person.circle.fill")
-                .foregroundColor(.blue)
-                .frame(width: 30)
-            Text(request)
-            Spacer()
-            HStack {
-                Button(action: { onResponse(true) }) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                }
-                Button(action: { onResponse(false) }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.red)
-                }
-            }
-        }
-    }
-}
-
-struct AddFriendView: View {
-    @Environment(\.dismiss) var dismiss
-    @ObservedObject var viewModel: FriendsViewModel
-    @State private var searchText = ""
     
     var body: some View {
         NavigationView {
             List {
-                Section(header: Text("Search Results")) {
-                    ForEach(viewModel.searchResults, id: \.self) { user in
+                Section(header: Text("Add Friends")) {
+                    Button(action: {
+                        showingAddFriend = true
+                    }) {
                         HStack {
-                            Text(user)
-                            Spacer()
-                            Button("Add") {
-                                viewModel.sendFriendRequest(to: user)
+                            Image(systemName: "person.badge.plus")
+                            Text("Add Friend")
+                        }
+                    }
+                }
+                
+                Section(header: Text("Friends")) {
+                    if _viewModel.wrappedValue.isLoading {
+                        ProgressView("Loading friends...")
+                    } else if viewModel.friends.isEmpty {
+                        Text("No friends yet")
+                            .foregroundColor(.gray)
+                    } else {
+                        ForEach(viewModel.friends, id: \.self) { friend in
+                            HStack {
+                                Image(systemName: "person.circle.fill")
+                                    .foregroundColor(.blue)
+                                Text(friend)
                             }
-                            .buttonStyle(.bordered)
                         }
                     }
                 }
             }
-            .navigationTitle("Add Friend")
-            .searchable(text: $searchText, prompt: "Search by username")
-            .onChange(of: searchText) { newValue in
-                viewModel.searchUsers(query: newValue)
+            .navigationTitle("Friends")
+            .refreshable {
+                await viewModel.loadFriends(username: appContext.user?.username ?? "")
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
+            .onAppear {
+                Task {
+                    await viewModel.loadFriends(username: appContext.user?.username ?? "")
                 }
+            }
+            .sheet(isPresented: $showingAddFriend) {
+                AddFriendSheet(viewModel: viewModel)
             }
         }
     }

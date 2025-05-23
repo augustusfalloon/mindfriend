@@ -3,131 +3,69 @@ import Combine
 
 class FriendsViewModel: ObservableObject {
     @Published var friends: [String] = []
-    @Published var pendingRequests: [String] = []
-    @Published var searchResults: [String] = []
+    @Published var isLoading = false
     @Published var error: String?
-    @Published var foundUser: String?
-
-
-    init(){
-        loadFriends()
-        loadPendingRequests()
+    
+    // Keep other properties if needed, but remove old mock data ones if they conflict
+    // @Published var pendingRequests: [String] = []
+    // @Published var searchResults: [String] = []
+    // @Published var foundUser: String?
+    
+    init() {
+        // Initialization moved to onAppear in the View, where username is available
     }
     
-    private var cancellables = Set<AnyCancellable>()
+    // private var cancellables = Set<AnyCancellable>() // Remove if not used
     
+    // MARK: - Backend Integration Functions
     
-    func loadFriends() {
-        // TODO: Implement API call to load friends
-        // For now, using mock data
-        friends = ["John Doe", "Jane Smith", "Mike Johnson"]
-    }
-    
-    func loadPendingRequests() {
-        // TODO: Implement API call to load pending requests
-        // For now, using mock data
-        pendingRequests = ["Alice Brown", "Bob Wilson"]
-    }
-    
-    func searchFriends(query: String) {
-        guard !query.isEmpty else {
-            searchResults = []
-            return
-        }
-        
-        // TODO: Implement API call to search friends
-        // For now, using mock data
-        searchResults = friends.filter { $0.lowercased().contains(query.lowercased()) }
-    }
-    
-    func searchUsers(query: String) {
-        guard !query.isEmpty else {
-            searchResults = []
-            return
-        }
-        
-        // TODO: Implement API call to search users
-        // For now, using mock data
-        searchResults = ["User1", "User2", "User3"].filter { $0.lowercased().contains(query.lowercased()) }
-    }
-    
-    func sendFriendRequest(to userID: String) {
-        // TODO: Implement API call to send friend request
-        pendingRequests.append(userID)
-    }
-    
-    func acceptFriendRequest(from userID: String) {
-        // TODO: Implement API call to accept friend request
-        friends.append(userID)
-        pendingRequests.removeAll { $0 == userID }
-    }
-    
-    func declineFriendRequest(from userID: String) {
-        // TODO: Implement API call to decline friend request
-        pendingRequests.removeAll { $0 == userID }
-    }
-    
-    func removeFriend(_ userID: String) {
-        // TODO: Implement API call to remove friend
-        friends.removeAll { $0 == userID }
-    }
-    
-    func searchForUser(username: String) async -> Bool {
-        print("Searching for user: \(username) (placeholder)")
-        // TODO: Implement actual backend call to check if user exists
-        
-        // Simulate a backend check returning true if username is "TestUser", false otherwise
-        try? await Task.sleep(nanoseconds: 500_000_000) // Simulate network delay
-        let userExists = username.lowercased() == "testuser"
-        
+    func loadFriends(username: String) async {
         DispatchQueue.main.async {
-            if userExists {
-                self.foundUser = username // Set the found user
-                self.error = nil // Clear any previous error
-                print("User \(username) found (simulated).")
-            } else {
-                self.foundUser = nil // Clear the found user
-                self.error = "User '\(username)' not found." // Set an error
-                print("User \(username) not found (simulated).")
-            }
+            self.isLoading = true
         }
-        //addFriend(username: username)
-        return userExists
-    }
-    
-    // Placeholder for adding a friend -> Implementing actual call with dummy data
-    func addFriendButton(userId: String, friendId: String, completion: @escaping (Bool) -> Void) async {
-    //func addFriendButton(userId: String) async {
-        print("Attempting to add friend: \(friendId)")
-    
-        // Create a continuation to handle the async completion
-        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            print("Sending add friend request to backend...")
-            
-            // Calling the backend addFriend function
-            MindFriend.addFriend(
-                userId: userId,
-                friendId: friendId
-            ) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(_):
-                        print("Add friend request sent successfully.")
-                        // Add the successfully added friend to the local friends list
-                        self.friends.append(friendId)
-                        self.error = nil // Clear any previous error
-                        completion(true) // Indicate success
-                        
-                    case .failure(let backendError):
-                        print("Add friend request failed: \(backendError.localizedDescription)")
-                        self.error = "Failed to add friend: \(backendError.localizedDescription)"
-                        completion(false) // Indicate failure
-                    }
+        
+        // Use the getFriends function from backEndIntegration.swift
+        MindFriend.getFriends(userId: username) { result in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                switch result {
+                case .success(let friendsList):
+                    self.friends = friendsList
+                    self.error = nil // Clear any previous error
+                case .failure(let error):
+                    self.error = error.localizedDescription
+                    print("Error loading friends: \(error)")
                 }
-                continuation.resume() // Resume the async task after handling the result
             }
         }
     }
-
-    // The existing sendFriendRequest function which calls the backend addFriend - let's keep this separate for now.
+    
+    func addFriendButton(userId: String, friendId: String, completion: @escaping (Bool) -> Void) async {
+        // Use the addFriend function from backEndIntegration.swift
+        MindFriend.addFriend(userId: userId, friendId: friendId) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    print("Friend added successfully.")
+                    // Reload friends list after successful addition
+                    Task {
+                        await self.loadFriends(username: userId)
+                    }
+                    self.error = nil // Clear any previous error
+                    completion(true)
+                case .failure(let backendError):
+                    self.error = backendError.localizedDescription
+                    print("Error adding friend: \(backendError)")
+                    completion(false)
+                }
+            }
+        }
+    }
+    
+    // Add other backend integration functions here as needed (e.g., for requests)
+    // func loadPendingRequests() { ... }
+    // func acceptFriendRequest(from userID: String) { ... }
+    // func declineFriendRequest(from userID: String) { ... }
+    // func searchUsers(query: String) { ... }
 } 
