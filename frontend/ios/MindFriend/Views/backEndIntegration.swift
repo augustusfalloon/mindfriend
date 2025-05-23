@@ -174,12 +174,12 @@ func restrictApp(userId: String, bundleID: String, dailyUsage: Int, completion: 
 
 // Update an app restriction for a user (matches user.js: updateRestriction expects userId, bundleID, time)
 func updateRestriction(userId: String, bundleID: String, time: Int, completion: @escaping (Result<Bool, Error>) -> Void) {
-  guard let url = URL(string: "http://localhost:3000/api/users/updateRestriction") else {
+  guard let url = URL(string: "http://localhost:3000/api/users/update-restriction") else {
     completion(.failure(NSError(domain: "Invalid URL", code: 0)))
     return
   }
   var request = URLRequest(url: url)
-  request.httpMethod = "PUT"
+  request.httpMethod = "PATCH"
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
   let body: [String: Any] = [
     "username": userId,
@@ -336,10 +336,7 @@ public func fetchAllApps(username: String, completion: @escaping (Result<[AppDat
             completion(.failure(NSError(domain: "No data", code: 0)))
             return
         }
-        // Print the raw response for debugging
-        let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode data"
-        print("[fetchAllApps] Raw response from backend:", responseString)
-        
+        // Removed print statement for raw response
         do {
             let userProfile = try JSONDecoder().decode(UserProfile.self, from: data)
             let apps = userProfile.restrictedApps ?? []
