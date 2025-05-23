@@ -23,7 +23,7 @@ router.patch('/toggle-restriciton', userController.toggleRestriciton);
 router.post('/add-friend', userController.addFriend);
 
 // GET /api/users/:userID → Get user info (optional)
-router.get('/:username', userController.getUserProfile);
+router.get('/:username', userController.getUserData);
 
 // POST /api/users/login → Login a user
 router.post('/login', userController.login);
