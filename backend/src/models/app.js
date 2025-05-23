@@ -23,7 +23,7 @@ AppSchema.statics.createApp = async function (params) {
   if (typeof num != 'number') {
     throw new Error('Daily usage must be a number');
   }
-  const app = new this({ userId: params.userId, bundleId: params.bundleId, dailyUsage: num, restricted: false });
+  const app = new this({ userId: params.userId, username: params.username, bundleId: params.bundleId, dailyUsage: num, restricted: false });
   return await app.save();
 };
 
