@@ -227,9 +227,182 @@ public func addFriend(userId: String, friendId: String, completion: @escaping (R
       return
     }
     completion(.success(true))
+    
   }
   task.resume()
 }
+
+// Define a struct to match the friend object structure from the backend
+public struct FriendModel: Codable {
+    let _id: String
+    let username: String
+    // Add other fields if needed
+}
+
+public func getFriends(userId: String, completion: @escaping (Result<[String], Error>) -> Void) {
+    print("\n=== getFriends Debug ===")
+    print("Calling getFriends for userId: \(userId)")
+    
+    guard let url = URL(string: "http://localhost:3000/api/users/\(userId)/friends") else {
+        print("Invalid URL")
+        completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+        return
+    }
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            print("Network error in getFriends: \(error)")
+            completion(.failure(error))
+            return
+        }
+        guard let data = data else {
+            print("No data received in getFriends")
+            completion(.failure(NSError(domain: "No data", code: 0)))
+            return
+        }
+        
+        print("Raw response data: \(String(data: data, encoding: .utf8) ?? "Unable to convert data to string")")
+        
+        do {
+            // First decode as array of FriendModel objects
+            let friendObjects = try JSONDecoder().decode([FriendModel].self, from: data)
+            // Then extract just the usernames
+            let usernames = friendObjects.map { $0.username }
+            print("Successfully decoded \(usernames.count) friends: \(usernames)")
+            completion(.success(usernames))
+        } catch {
+            print("Decoding error in getFriends: \(error)")
+            completion(.failure(error))
+        }
+    }
+    task.resume()
+}
+
+// Define a struct to match the backend AppSchema structure for decoding
+public struct AppBackendModel: Codable {
+    let _id: String // MongoDB default ID
+    let userId: String
+    let bundleId: String
+    let dailyUsage: Int
+    let restricted: Bool? // Optional as it has a default value
+    let comments: String? // Optional as it has a default value
+    // If your backend returns __v for versioning, you might need:
+    // let __v: Int?
+}
+
+// Function to get a list of apps a user has exceeded their time limit for
+public func getExceeded(userId: String, completion: @escaping (Result<[AppBackendModel], Error>) -> Void) {
+    print("\n=== getExceeded Debug ===")
+    print("Calling getExceeded for userId: \(userId)")
+    
+    guard let url = URL(string: "http://localhost:3000/api/users/exceeded") else {
+        completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+        return
+    }
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    
+    let body: [String: Any] = ["username": userId]
+    do {
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        print("Request body: \(String(data: request.httpBody!, encoding: .utf8) ?? "Unable to convert body to string")")
+    } catch {
+        completion(.failure(error))
+        return
+    }
+    
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            print("Network error in getExceeded: \(error)")
+            completion(.failure(error))
+            return
+        }
+        guard let data = data else {
+            print("No data received in getExceeded")
+            completion(.failure(NSError(domain: "No data", code: 0)))
+            return
+        }
+        
+        print("Raw response data: \(String(data: data, encoding: .utf8) ?? "Unable to convert data to string")")
+        
+        do {
+            let exceededApps = try JSONDecoder().decode([AppBackendModel].self, from: data)
+            print("Successfully decoded \(exceededApps.count) apps")
+            completion(.success(exceededApps))
+        } catch {
+            print("Decoding error in getExceeded: \(error)")
+            completion(.failure(error))
+        }
+    }
+    task.resume()
+}
+
+// Function to get feed data: friends list and exceeded apps for each friend
+public func getFeed(username: String, completion: @escaping (Result<[[AppBackendModel]], Error>) -> Void) {
+    print("\n=== getFeed Debug ===")
+    print("Starting getFeed for username: \(username)")
+    
+    // Step 1: Get the list of friends for the user
+    getFriends(userId: username) { result in
+        switch result {
+        case .success(let friendsList):
+            print("Successfully got friends list: \(friendsList)")
+            guard !friendsList.isEmpty else {
+                print("Friends list is empty")
+                completion(.success([]))
+                return
+            }
+            
+            // Step 2: For each friend, get their exceeded apps
+            let dispatchGroup = DispatchGroup()
+            var exceededAppsResults: [[AppBackendModel]] = []
+            var encounteredError: Error?
+            
+            exceededAppsResults = Array(repeating: [], count: friendsList.count)
+            print("Initialized results array for \(friendsList.count) friends")
+
+            for (index, friendUsername) in friendsList.enumerated() {
+                print("\nFetching exceeded apps for friend \(index + 1): \(friendUsername)")
+                dispatchGroup.enter()
+                getExceeded(userId: friendUsername) { exceededResult in
+                    defer { dispatchGroup.leave() }
+                    
+                    switch exceededResult {
+                    case .success(let apps):
+                        print("Successfully got \(apps.count) exceeded apps for friend \(friendUsername)")
+                        exceededAppsResults[index] = apps
+                    case .failure(let error):
+                        print("Error getting exceeded apps for friend \(friendUsername): \(error)")
+                        if encounteredError == nil {
+                            encounteredError = error
+                        }
+                    }
+                }
+            }
+            
+            // Step 3: When all getExceeded calls are complete
+            dispatchGroup.notify(queue: .main) {
+                if let error = encounteredError {
+                    print("Encountered error in getFeed: \(error)")
+                    completion(.failure(error))
+                } else {
+                    let nonEmptyResults = exceededAppsResults.filter { !$0.isEmpty }
+                    print("Final results: \(nonEmptyResults.count) friends with exceeded apps")
+                    completion(.success(nonEmptyResults))
+                }
+            }
+            
+        case .failure(let error):
+            print("Error getting friends list: \(error)")
+            completion(.failure(error))
+        }
+    }
+}
+
 
 public func sendSignup(username: String, email: String, password: String, completion: @escaping (Result<SignupResponse, Error>) -> Void) {
 

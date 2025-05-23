@@ -14,4 +14,4 @@ struct AppUser: Codable, Identifiable {
         case restrictedApps
         case friends
     }
-} 
+}

@@ -8,7 +8,6 @@ struct FeedView: View {
     @State private var reason = ""
     
     var body: some View {
-        
         NavigationView {
             ZStack {
                 List {
@@ -18,10 +17,12 @@ struct FeedView: View {
                 }
                 .navigationTitle("Friend Activity")
                 .refreshable {
-                    await viewModel.loadActivities()
+                    await viewModel.loadActivities(username: appContext.user?.username ?? "")
                 }
                 .onAppear {
-                    print(appContext.user)
+                    Task {
+                        await viewModel.loadActivities(username: appContext.user?.username ?? "")
+                    }
                 }
                 
                 VStack {
@@ -114,29 +115,57 @@ class FeedViewModel: ObservableObject {
     @Published var restrictedApps: [String] = ["Instagram", "YouTube", "TikTok", "Twitter", "Facebook"]
     
     init() {
-        Task {
-            await loadActivities()
-        }
+        // Initialization moved to onAppear
     }
     
     @MainActor
-    func loadActivities() async {
-        // TODO: Implement API call to load friend activities
-        // For now, using mock data
-        friendActivities = [
-            FriendActivity(
-                friendId: "user1",
-                friendName: "John Doe",
-                appName: "Instagram",
-                justification: "Posting homework"
-            ),
-            FriendActivity(
-                friendId: "user2",
-                friendName: "Jane Smith",
-                appName: "YouTube",
-                justification: "Watching tutorial"
-            )
-        ]
+    func loadActivities(username: String) async {
+        print("Loading activities for username: \(username)")
+        getFeed(username: username) { result in
+            switch result {
+            case .success(let friendApps):
+                print("\n=== Raw Feed Data ===")
+                print("Number of friends with exceeded apps: \(friendApps.count)")
+                
+                for (friendIndex, friendAppsList) in friendApps.enumerated() {
+                    print("\nFriend \(friendIndex + 1) Apps:")
+                    for app in friendAppsList {
+                        print("""
+                            - App ID: \(app._id)
+                            - Username: \(app.username)
+                            - User ID: \(app.userId)
+                            - Bundle ID: \(app.bundleId)
+                            - Daily Usage: \(app.dailyUsage)
+                            - Restricted: \(app.restricted ?? false)
+                            - Comments: \(app.comments ?? "No comments")
+                            """)
+                    }
+                }
+                print("=== End Feed Data ===\n")
+                
+                // Convert AppBackendModel arrays to FriendActivity array
+                var newActivities: [FriendActivity] = []
+                
+                for friendAppsList in friendApps {
+                    for app in friendAppsList {
+                        let activity = FriendActivity(
+                            friendId: app.userId,
+                            friendName: app.username, // Using userId as name since that's what we have
+                            appName: app.bundleId,
+                            justification: app.comments ?? "No reason provided"
+                        )
+                        newActivities.append(activity)
+                    }
+                }
+                
+                // Sort activities by timestamp (most recent first)
+                self.friendActivities = newActivities.sorted { $0.timestamp > $1.timestamp }
+                
+            case .failure(let error):
+                print("Error loading feed: \(error)")
+                // Handle error appropriately
+            }
+        }
     }
     
     func addActivity(appName: String, justification: String, appContext: AppContext) {
