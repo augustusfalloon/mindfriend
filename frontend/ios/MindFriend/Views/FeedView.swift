@@ -161,38 +161,17 @@ class FeedViewModel: ObservableObject {
     
     func addComment(app: AppBackendModel, comment: String, appContext: AppContext) {
         guard let username = appContext.user?.username else { return }
-        
-        // Create the request body
-        let body: [String: Any] = [
-            "username": username,
-            "bundleID": app.bundleId,
-            "comment": comment
-        ]
-        
-        guard let url = URL(string: "http://localhost:3000/api/users/add-comment") else { return }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: body)
-        } catch {
-            self.error = error.localizedDescription
-            return
-        }
-        
-        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+        addCommentToBackend(username: username, bundleID: app.bundleId, comment: comment) { [weak self] result in
             DispatchQueue.main.async {
-                if let error = error {
+                switch result {
+                case .success:
+                    // Optionally reload exceeded apps to get updated comments
+                    self?.loadExceededApps(username: username)
+                case .failure(let error):
                     self?.error = error.localizedDescription
-                    return
                 }
-                
-                // Reload exceeded apps to get updated comments
-                self?.loadExceededApps(username: username)
             }
         }
-        task.resume()
     }
 }
 

@@ -527,7 +527,7 @@ public func fetchAllApps(username: String, completion: @escaping (Result<[AppDat
 }
 
 // Function to add/update a comment for an app
-public func addComment(username: String, bundleID: String, comment: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+public func addCommentToBackend(username: String, bundleID: String, comment: String, completion: @escaping (Result<Bool, Error>) -> Void) {
     guard let url = URL(string: "http://localhost:3000/api/users/add-comment") else {
         completion(.failure(NSError(domain: "Invalid URL", code: 0)))
         return
