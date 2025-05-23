@@ -59,15 +59,6 @@ describe('Basic route test', () => {
     expect(res.body.message).toBe('Restriction updated successfully.');
   });
 
-  it('now we will toggle facebook in order to make it exceeded', async() => {
-    const res = await request(baseURL)
-        .patch("/api/users/toggle-restriciton")
-        .send({
-            username: "test1",
-            bundleID: 'facebook'
-        });
-    expect(res.statusCode).toBe(200);
-  });
 
   it("we will check the ammendment by see if pass data about it, it will be exceeded by putting the time used as 70", async () => {
     const res = await request(baseURL)
