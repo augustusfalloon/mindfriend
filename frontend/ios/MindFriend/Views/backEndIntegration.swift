@@ -282,7 +282,7 @@ public func getFriends(userId: String, completion: @escaping (Result<[String], E
 }
 
 // Define a struct to match the backend AppSchema structure for decoding
-public struct AppBackendModel: Codable {
+public struct AppBackendModel: Codable, Hashable {
     let _id: String // MongoDB default ID
     let userId: String
     let bundleId: String
@@ -517,6 +517,42 @@ public func fetchAllApps(username: String, completion: @escaping (Result<[AppDat
         } catch {
             completion(.failure(error))
         }
+    }
+    task.resume()
+}
+
+// Function to add/update a comment for an app
+public func addComment(username: String, bundleID: String, comment: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+    guard let url = URL(string: "http://localhost:3000/api/users/add-comment") else {
+        completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+        return
+    }
+    
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    
+    let body: [String: Any] = [
+        "username": username,
+        "bundleID": bundleID,
+        "comment": comment
+    ]
+    
+    do {
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+    } catch {
+        completion(.failure(error))
+        return
+    }
+    
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            completion(.failure(error))
+            return
+        }
+        
+        // If we get here, the request was successful
+        completion(.success(true))
     }
     task.resume()
 }

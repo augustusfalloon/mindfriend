@@ -4,7 +4,7 @@ struct FeedView: View {
     @EnvironmentObject var appContext: AppContext
     @StateObject private var viewModel = FeedViewModel()
     @State private var showingReasonSheet = false
-    @State private var selectedApp = ""
+    @State private var selectedApp: AppBackendModel?
     @State private var reason = ""
     
     var body: some View {
@@ -22,12 +22,19 @@ struct FeedView: View {
                 .onAppear {
                     Task {
                         await viewModel.loadActivities(username: appContext.user?.username ?? "")
+                        // Load exceeded apps when view appears
+                        if let username = appContext.user?.username {
+                            viewModel.loadExceededApps(username: username)
+                        }
                     }
                 }
                 
                 VStack {
                     Spacer()
                     Button(action: {
+                        if let username = appContext.user?.username {
+                            viewModel.loadExceededApps(username: username)
+                        }
                         showingReasonSheet = true
                     }) {
                         Text("Enter Reason")
@@ -45,8 +52,9 @@ struct FeedView: View {
                     Form {
                         Section(header: Text("Select App")) {
                             Picker("App", selection: $selectedApp) {
-                                ForEach(viewModel.restrictedApps, id: \.self) { app in
-                                    Text(app).tag(app)
+                                Text("Select an app").tag(nil as AppBackendModel?)
+                                ForEach(viewModel.exceededApps, id: \._id) { app in
+                                    Text(app.bundleId).tag(app as AppBackendModel?)
                                 }
                             }
                         }
@@ -58,17 +66,19 @@ struct FeedView: View {
                         
                         Section {
                             Button(action: {
-                                viewModel.addActivity(appName: selectedApp, justification: reason, appContext: appContext)
+                                if let app = selectedApp {
+                                    viewModel.addComment(app: app, comment: reason, appContext: appContext)
+                                }
                                 showingReasonSheet = false
-                                selectedApp = ""
+                                selectedApp = nil
                                 reason = ""
                             }) {
                                 Text("Submit")
                                     .frame(maxWidth: .infinity)
                                     .foregroundColor(.white)
                             }
-                            .disabled(selectedApp.isEmpty || reason.isEmpty)
-                            .listRowBackground(selectedApp.isEmpty || reason.isEmpty ? Color.gray : Color.blue)
+                            .disabled(selectedApp == nil || reason.isEmpty)
+                            .listRowBackground(selectedApp == nil || reason.isEmpty ? Color.gray : Color.blue)
                         }
                     }
                     .navigationTitle("Enter Reason")
@@ -81,44 +91,12 @@ struct FeedView: View {
     }
 }
 
-struct ActivityRow: View {
-    let activity: FriendActivity
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: "person.circle.fill")
-                    .foregroundColor(.blue)
-                Text(activity.friendName)
-                    .font(.headline)
-                Spacer()
-                Text(activity.timestamp, style: .relative)
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
-            
-            Text("Used \(activity.appName)")
-                .font(.subheadline)
-            
-            if !activity.justification.isEmpty {
-                Text(activity.justification)
-                    .font(.body)
-                    .padding(.vertical, 4)
-            }
-        }
-        .padding(.vertical, 8)
-    }
-}
-
 class FeedViewModel: ObservableObject {
     @Published var friendActivities: [FriendActivity] = []
-    @Published var restrictedApps: [String] = ["Instagram", "YouTube", "TikTok", "Twitter", "Facebook"]
+    @Published var exceededApps: [AppBackendModel] = []
+    @Published var isLoading = false
+    @Published var error: String?
     
-    init() {
-        // Initialization moved to onAppear
-    }
-    
-    @MainActor
     func loadActivities(username: String) async {
         print("Loading activities for username: \(username)")
         getFeed(username: username) { result in
@@ -132,7 +110,7 @@ class FeedViewModel: ObservableObject {
                     for app in friendAppsList {
                         print("""
                             - App ID: \(app._id)
-                            - Username: \(app.username)
+                            - Username: \(app.userId)
                             - User ID: \(app.userId)
                             - Bundle ID: \(app.bundleId)
                             - Daily Usage: \(app.dailyUsage)
@@ -150,7 +128,7 @@ class FeedViewModel: ObservableObject {
                     for app in friendAppsList {
                         let activity = FriendActivity(
                             friendId: app.userId,
-                            friendName: app.username, // Using userId as name since that's what we have
+                            friendName: app.userId, // Using userId as name since that's what we have
                             appName: app.bundleId,
                             justification: app.comments ?? "No reason provided"
                         )
@@ -168,14 +146,71 @@ class FeedViewModel: ObservableObject {
         }
     }
     
-    func addActivity(appName: String, justification: String, appContext: AppContext) {
-        let newActivity = FriendActivity(
-            friendId: appContext.user?.id ?? "",
-            friendName: appContext.user?.username ?? "You",
-            appName: appName,
-            justification: justification
-        )
-        friendActivities.insert(newActivity, at: 0)
+    func loadExceededApps(username: String) {
+        getExceeded(userId: username) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let apps):
+                    self?.exceededApps = apps
+                case .failure(let error):
+                    self?.error = error.localizedDescription
+                }
+            }
+        }
+    }
+    
+    func addComment(app: AppBackendModel, comment: String, appContext: AppContext) {
+        guard let username = appContext.user?.username else { return }
+        
+        // Create the request body
+        let body: [String: Any] = [
+            "username": username,
+            "bundleID": app.bundleId,
+            "comment": comment
+        ]
+        
+        guard let url = URL(string: "http://localhost:3000/api/users/add-comment") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            self.error = error.localizedDescription
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.error = error.localizedDescription
+                    return
+                }
+                
+                // Reload exceeded apps to get updated comments
+                self?.loadExceededApps(username: username)
+            }
+        }
+        task.resume()
+    }
+}
+
+struct ActivityRow: View {
+    let activity: FriendActivity
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(activity.appName)
+                .font(.headline)
+            Text(activity.justification)
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            Text(activity.timestamp, style: .relative)
+                .font(.caption)
+                .foregroundColor(.gray)
+        }
+        .padding(.vertical, 4)
     }
 }
 
