@@ -123,16 +123,15 @@ class FeedViewModel: ObservableObject {
         print("Loading activities for username: \(username)")
         getFeed(username: username) { result in
             switch result {
-            case .success(let friendApps):
+            case .success(let friendAppsList):
                 print("\n=== Raw Feed Data ===")
-                print("Number of friends with exceeded apps: \(friendApps.count)")
+                print("Number of friends with exceeded apps: \(friendAppsList.count)")
                 
-                for (friendIndex, friendAppsList) in friendApps.enumerated() {
-                    print("\nFriend \(friendIndex + 1) Apps:")
-                    for app in friendAppsList {
+                for friendApps in friendAppsList {
+                    print("\nFriend: \(friendApps.username)")
+                    for app in friendApps.apps {
                         print("""
                             - App ID: \(app._id)
-                            - Username: \(app.username)
                             - User ID: \(app.userId)
                             - Bundle ID: \(app.bundleId)
                             - Daily Usage: \(app.dailyUsage)
@@ -143,14 +142,14 @@ class FeedViewModel: ObservableObject {
                 }
                 print("=== End Feed Data ===\n")
                 
-                // Convert AppBackendModel arrays to FriendActivity array
+                // Convert FriendApps to FriendActivity array
                 var newActivities: [FriendActivity] = []
                 
-                for friendAppsList in friendApps {
-                    for app in friendAppsList {
+                for friendApps in friendAppsList {
+                    for app in friendApps.apps {
                         let activity = FriendActivity(
                             friendId: app.userId,
-                            friendName: app.username, // Using userId as name since that's what we have
+                            friendName: friendApps.username, // Use the username from FriendApps
                             appName: app.bundleId,
                             justification: app.comments ?? "No reason provided"
                         )

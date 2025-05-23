@@ -341,8 +341,14 @@ public func getExceeded(userId: String, completion: @escaping (Result<[AppBacken
     task.resume()
 }
 
+// Struct to hold a friend's username and their exceeded apps
+public struct FriendApps: Codable {
+    let username: String
+    let apps: [AppBackendModel]
+}
+
 // Function to get feed data: friends list and exceeded apps for each friend
-public func getFeed(username: String, completion: @escaping (Result<[[AppBackendModel]], Error>) -> Void) {
+public func getFeed(username: String, completion: @escaping (Result<[FriendApps], Error>) -> Void) {
     print("\n=== getFeed Debug ===")
     print("Starting getFeed for username: \(username)")
     
@@ -359,14 +365,11 @@ public func getFeed(username: String, completion: @escaping (Result<[[AppBackend
             
             // Step 2: For each friend, get their exceeded apps
             let dispatchGroup = DispatchGroup()
-            var exceededAppsResults: [[AppBackendModel]] = []
+            var friendAppsResults: [FriendApps] = []
             var encounteredError: Error?
             
-            exceededAppsResults = Array(repeating: [], count: friendsList.count)
-            print("Initialized results array for \(friendsList.count) friends")
-
-            for (index, friendUsername) in friendsList.enumerated() {
-                print("\nFetching exceeded apps for friend \(index + 1): \(friendUsername)")
+            for friendUsername in friendsList {
+                print("\nFetching exceeded apps for friend: \(friendUsername)")
                 dispatchGroup.enter()
                 getExceeded(userId: friendUsername) { exceededResult in
                     defer { dispatchGroup.leave() }
@@ -374,7 +377,8 @@ public func getFeed(username: String, completion: @escaping (Result<[[AppBackend
                     switch exceededResult {
                     case .success(let apps):
                         print("Successfully got \(apps.count) exceeded apps for friend \(friendUsername)")
-                        exceededAppsResults[index] = apps
+                        let friendApps = FriendApps(username: friendUsername, apps: apps)
+                        friendAppsResults.append(friendApps)
                     case .failure(let error):
                         print("Error getting exceeded apps for friend \(friendUsername): \(error)")
                         if encounteredError == nil {
@@ -390,7 +394,8 @@ public func getFeed(username: String, completion: @escaping (Result<[[AppBackend
                     print("Encountered error in getFeed: \(error)")
                     completion(.failure(error))
                 } else {
-                    let nonEmptyResults = exceededAppsResults.filter { !$0.isEmpty }
+                    // Filter out entries with no apps
+                    let nonEmptyResults = friendAppsResults.filter { !$0.apps.isEmpty }
                     print("Final results: \(nonEmptyResults.count) friends with exceeded apps")
                     completion(.success(nonEmptyResults))
                 }
