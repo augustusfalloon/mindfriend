@@ -50,6 +50,7 @@ userSchema.methods.restrictApp = async function(bundleID, dailyUsage) {
     }
     const newApp = await App.createApp({
         userId: this._id,
+        username: this.username,
         bundleId: bundleID,
         dailyUsage: dailyUsage,
         restricted: false,
