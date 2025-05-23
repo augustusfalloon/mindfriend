@@ -112,7 +112,7 @@ exports.addFriend = async (req, res) => {
 exports.getUserProfile = async (req, res) => {
     try {
         const { username } = req.params;
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ username }).populate('restrictedApps');
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }

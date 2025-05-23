@@ -77,7 +77,7 @@ struct LoginView: View {
                 Text(successMessage)
             }
             .fullScreenCover(isPresented: $isLoggedIn) {
-                MainTabView()
+                MainTabView(appContext: appContext)
                     .environmentObject(appContext)
             }
             .sheet(isPresented: $showingSignUp) {

@@ -182,9 +182,9 @@ func updateRestriction(userId: String, bundleID: String, time: Int, completion: 
   request.httpMethod = "PUT"
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
   let body: [String: Any] = [
-    "userId": userId,
+    "username": userId,
     "bundleID": bundleID,
-    "time": time
+    "newTime": time
   ]
   do {
     request.httpBody = try JSONSerialization.data(withJSONObject: body)
@@ -300,3 +300,53 @@ let record = ScreenTimeRecord(
 //         print("Error fetching screen time: \(error)")
 //     }
 // }
+
+// Struct to match the App schema from backend
+public struct AppData: Codable {
+    let userId: String
+    let bundleId: String
+    let dailyUsage: Int
+    let restricted: Bool
+    let comments: String
+}
+
+// Struct to match the user object returned from backend
+public struct UserProfile: Codable {
+    let restrictedApps: [AppData]?
+    // Add other fields if needed
+}
+
+// Function to fetch all apps for a user using GET /api/users/:username
+public func fetchAllApps(username: String, completion: @escaping (Result<[AppData], Error>) -> Void) {
+    guard let url = URL(string: "http://localhost:3000/api/users/\(username)") else {
+        completion(.failure(NSError(domain: "Invalid URL", code: 0)))
+        return
+    }
+    
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            completion(.failure(error))
+            return
+        }
+        
+        guard let data = data else {
+            completion(.failure(NSError(domain: "No data", code: 0)))
+            return
+        }
+        // Print the raw response for debugging
+        let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode data"
+        print("[fetchAllApps] Raw response from backend:", responseString)
+        
+        do {
+            let userProfile = try JSONDecoder().decode(UserProfile.self, from: data)
+            let apps = userProfile.restrictedApps ?? []
+            completion(.success(apps))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+    task.resume()
+}

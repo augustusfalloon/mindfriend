@@ -4,15 +4,19 @@ import UserNotifications
 
 struct MainTabView: View {
     @EnvironmentObject var appContext: AppContext
-    @StateObject private var viewModel = RestrictedAppsViewModel()
+    @StateObject private var viewModel: RestrictedAppsViewModel
     @State private var showingEditRestrictedApps = false
     @State private var showingAuthorizationAlert = false
     @State private var authorizationError: String?
     @State private var hasRequestedPermissions = false
     
+    init(appContext: AppContext) {
+        _viewModel = StateObject(wrappedValue: RestrictedAppsViewModel(appContext: appContext))
+    }
+    
     var body: some View {
         TabView {
-            RestrictedAppsView()
+            RestrictedAppsView(viewModel: viewModel)
                 .tabItem {
                     Label("Apps", systemImage: "app.badge")
                 }
@@ -39,35 +43,61 @@ struct MainTabView: View {
 }
 
 struct RestrictedAppsView: View {
-    @StateObject private var viewModel = RestrictedAppsViewModel()
+    @EnvironmentObject var appContext: AppContext
+    @StateObject private var viewModel: RestrictedAppsViewModel
     @State private var showingEditSheet = false
+    
+    init(viewModel: RestrictedAppsViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
     
     var body: some View {
         NavigationView {
             VStack {
-                List {
-                    Section(header: Text("Restricted Apps")) {
-                        ForEach(viewModel.restrictedApps) { app in
-                            AppRow(app: app, viewModel: viewModel)
+                if viewModel.isLoading {
+                    ProgressView("Loading apps...")
+                } else if let error = viewModel.error {
+                    VStack {
+                        Text("Error loading apps")
+                            .foregroundColor(.red)
+                        Text(error)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                        Button("Retry") {
+                            viewModel.loadRestrictedApps()
+                        }
+                        .padding()
+                    }
+                } else {
+                    List {
+                        Section(header: Text("Restricted Apps")) {
+                            ForEach(viewModel.restrictedApps) { app in
+                                AppRow(app: app, viewModel: viewModel)
+                            }
                         }
                     }
+                    
+                    Button(action: {
+                        showingEditSheet = true
+                    }) {
+                        Text("Edit Restricted Apps")
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                    }
+                    .padding()
                 }
-                
-                Button(action: {
-                    showingEditSheet = true
-                }) {
-                    Text("Edit Restricted Apps")
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                }
-                .padding()
             }
             .navigationTitle("Restricted Apps")
             .sheet(isPresented: $showingEditSheet) {
                 EditRestrictedAppsView(viewModel: viewModel)
+            }
+            .onAppear {
+                if viewModel.appContext !== appContext {
+                    viewModel.appContext = appContext
+                }
             }
         }
     }
@@ -172,24 +202,57 @@ struct AppRow: View {
 class RestrictedAppsViewModel: ObservableObject {
     @Published var restrictedApps: [RestrictedApp] = []
     @Published var availableApps: [RestrictedApp] = []
+    @Published var isLoading = false
+    @Published var error: String?
+    var appContext: AppContext
     
-    init() {
+    init(appContext: AppContext) {
+        self.appContext = appContext
         loadRestrictedApps()
         loadAvailableApps()
     }
     
-    private func loadRestrictedApps() {
-        // TODO: Implement API call to load restricted apps
-        // For now, using mock data
-        restrictedApps = [
-            RestrictedApp(id: "1", name: "Instagram", icon: "camera.fill", isRestricted: false, timeLimit: 30),
-            RestrictedApp(id: "2", name: "YouTube", icon: "play.rectangle.fill", isRestricted: false, timeLimit: 60),
-            RestrictedApp(id: "3", name: "TikTok", icon: "video.fill", isRestricted: false, timeLimit: 45)
-        ]
+    func loadRestrictedApps() {
+        guard let username = appContext.user?.username else {
+            error = "User not logged in"
+            print("[loadRestrictedApps] ERROR: User not logged in")
+            return
+        }
+        print("[loadRestrictedApps] Sending username to backend:", username)
+
+        isLoading = true
+        fetchAllApps(username: username) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                switch result {
+                case .success(let apps):
+                    print("[loadRestrictedApps] Received apps from backend:", apps)
+                    self?.restrictedApps = apps.map { app in
+                        RestrictedApp(
+                            id: app.bundleId,
+                            name: app.bundleId,
+                            icon: "app.fill",
+                            isRestricted: app.restricted,
+                            timeLimit: app.dailyUsage
+                        )
+                    }
+                case .failure(let error):
+                    print("[loadRestrictedApps] ERROR from backend:", error)
+                    self?.error = error.localizedDescription
+                    // Fallback to mock data if API call fails
+                    self?.restrictedApps = [
+                        RestrictedApp(id: "1", name: "Instagram", icon: "camera.fill", isRestricted: false, timeLimit: 30),
+                        RestrictedApp(id: "2", name: "YouTube", icon: "play.rectangle.fill", isRestricted: false, timeLimit: 60),
+                        RestrictedApp(id: "3", name: "TikTok", icon: "video.fill", isRestricted: false, timeLimit: 45)
+                    ]
+                }
+            }
+        }
     }
     
     private func loadAvailableApps() {
-        // Mock data for available apps
+        // For now, keeping mock data for available apps
+        // You might want to implement a separate API endpoint for this
         availableApps = [
             RestrictedApp(id: "4", name: "Facebook", icon: "person.2.fill", isRestricted: false, timeLimit: 0),
             RestrictedApp(id: "5", name: "Twitter", icon: "bubble.left.fill", isRestricted: false, timeLimit: 0),
@@ -201,22 +264,61 @@ class RestrictedAppsViewModel: ObservableObject {
     }
     
     func updateAppTimeLimit(_ app: RestrictedApp, minutes: Int) {
+        guard let username = appContext.user?.username else {
+            error = "User not logged in"
+            return
+        }
+        
         if let index = restrictedApps.firstIndex(where: { $0.id == app.id }) {
             restrictedApps[index].timeLimit = minutes
-            // TODO: Implement API call to update time limit
+            updateRestriction(userId: username, bundleID: app.id, time: minutes) { [weak self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(_):
+                        print("Successfully updated time limit")
+                    case .failure(let error):
+                        print("Failed to update time limit: \(error)")
+                        // Revert the change if the API call fails
+                        self?.restrictedApps[index].timeLimit = app.timeLimit
+                    }
+                }
+            }
         }
     }
     
     func addRestrictedApp(_ app: RestrictedApp) {
+        guard let username = appContext.user?.username else {
+            error = "User not logged in"
+            return
+        }
+        
         restrictedApps.append(app)
         availableApps.removeAll { $0.id == app.id }
-        // TODO: Implement API call to add restricted app
+        restrictApp(userId: username, bundleID: app.id, dailyUsage: app.timeLimit) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(_):
+                    print("Successfully added restricted app")
+                case .failure(let error):
+                    print("Failed to add restricted app: \(error)")
+                    // Revert the change if the API call fails
+                    self?.restrictedApps.removeAll { $0.id == app.id }
+                    self?.availableApps.append(app)
+                }
+            }
+        }
     }
     
     func removeRestrictedApp(_ app: RestrictedApp) {
+        guard let username = appContext.user?.username else {
+            error = "User not logged in"
+            return
+        }
+        
         restrictedApps.removeAll { $0.id == app.id }
         availableApps.append(app)
         // TODO: Implement API call to remove restricted app
+        // Note: You'll need to add a removeRestriction function to backEndIntegration.swift
     }
 }
 
@@ -267,5 +369,5 @@ struct RestrictedApp: Identifiable {
 // }
 
 #Preview {
-    MainTabView()
+    MainTabView(appContext: AppContext())
 } 
