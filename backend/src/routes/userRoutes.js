@@ -6,7 +6,7 @@ const userController = require('../controllers/userController');
 router.post('/', userController.createUser);
 
 // POST /api/users/restrict-app → Restrict an app
-//WE SHOULD NEVER USE THIS, ONLY DO 
+//WE SHOULD NEVER USE THIS, ONLY DO UPDATE
 router.post('/restrict-app', userController.restrictApp);
 
 // patch /api/users/update-restriction → Update restriction
@@ -23,7 +23,7 @@ router.patch('/toggle-restriciton', userController.toggleRestriciton);
 router.post('/add-friend', userController.addFriend);
 
 // GET /api/users/:userID → Get user info (optional)
-router.get('/:userID', userController.getUserProfile);
+router.get('/:username', userController.getUserProfile);
 
 // POST /api/users/login → Login a user
 router.post('/login', userController.login);
@@ -34,6 +34,6 @@ router.post('/logout', userController.logout);
 // POST /api/users/add-comment
 router.post('/add-comment', userController.addComment);
 
-router.get('/exceeded', userController.getExceeded);
+router.post('/exceeded', userController.getExceeded);
 
 module.exports = router;

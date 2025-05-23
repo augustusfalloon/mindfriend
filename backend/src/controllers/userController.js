@@ -45,12 +45,11 @@ exports.restrictApp = async (req, res) => {
 // update a restriction for an app
 exports.updateRestriction = async (req, res) => {
     try {
-        const { userID, bundleID, newTime } = req.body;
-        const user = await User.findOne({ userID });
+        const { username, bundleID, newTime } = req.body;
+        const user = await User.findOne({ username });
         if (!user) throw new Error('User not found.');
 
         await user.updateRestriction(bundleID, newTime);
-        await user.save();
 
         res.status(200).json({ message: 'Restriction updated successfully.' });
     } catch (error) {
@@ -61,11 +60,11 @@ exports.updateRestriction = async (req, res) => {
 
 exports.toggleRestriciton = async (req, res) => {
     try {
-        const { userID, bundleID } = req.body;
-        const user = await User.findOne({ userID });
+        const { username, bundleID } = req.body;
+        const user = await User.findOne({ username });
         if (!user) throw new Error('User not found.');
 
-        await user.toggleRestriciton(bundleID);
+        await user.toggleRestriction(bundleID);
 
         res.status(200).json({ message: 'Restriction toggled successfully.' });
     } catch (error) {
@@ -96,8 +95,10 @@ exports.addFriend = async (req, res) => {
         const { username, friendUsername } = req.body;
         console.log(req.body);
         const user = await User.findOne({ username });
-        if (!user) throw new Error('User not found.');
-  
+        if (!user) {
+            throw new Error('User not found.');
+        }
+
         await user.addFriend(friendUsername);
         await user.save();
 
@@ -123,13 +124,13 @@ exports.getUserProfile = async (req, res) => {
 
 exports.addComment = async (req, res) => {
     try {
-        const { username, comment, bundleID } = req.params;
+        const { username, comment, bundleID } = req.body;
         const user = await User.findOne({ username });
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
-        await user.addComment(comment, bundleID);
-
+        await user.addComment(bundleID, comment);
+        res.status(200).json("Comment added")
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -137,13 +138,16 @@ exports.addComment = async (req, res) => {
 
 exports.getExceeded = async (req, res) => {
     try {
-        const {usage, username} = req.params;
+        const {usage, username} = req.body;
+
         const user = await User.findOne({ username });
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-        const exceeded = user.getExceeded(usage);
+        const exceeded = await user.getExceeded(usage);
+        console.log("DOOOOOO");
+        console.log(exceeded);
         res.status(200).json(exceeded);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -152,7 +156,7 @@ exports.getExceeded = async (req, res) => {
 
 exports.getApps = async(req, res) => {
     try {
-        const {username} = req.params;
+        const {username} = req.body;
         const user = await User.findOne({username});
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
@@ -242,6 +246,7 @@ exports.getUserData = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
     }
+    await user.populate('restrictedApps');
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });

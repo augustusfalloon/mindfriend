@@ -40,6 +40,7 @@ AppSchema.methods.hasExceeded = function (usageMin) {
     // const { usageMin } = paramgs.usageMin;
     let remain = this.getRemaining(usageMin);
     console.log("Remain: ", typeof(remain));
+    console.log(remain);
     if (remain < 0) {
         return true;
     }

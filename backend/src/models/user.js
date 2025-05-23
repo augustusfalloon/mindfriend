@@ -116,6 +116,8 @@ userSchema.methods.addComment = async function(bundleId, comment) {
         throw new Error('Invalid appID');
     }
     await this.populate("restrictedApps");
+    console.log(this.restrictedApps);
+    console.log(bundleId);
     const existingApp = this.restrictedApps.find(app => app.bundleId === bundleId);
     if (!existingApp) {
         throw new Error("No bundle ID exists");
@@ -134,15 +136,23 @@ userSchema.methods.getExceeded = async function(usage) {
 
     await this.populate("restrictedApps");
 
+    console.log(usage);
+
     for (const[key, value] of Object.entries(usage)) {
+        console.log(`${key}, ${value}`);
+        console.log(this.restrictedApps);
         const app = this.restrictedApps.find(app => app.bundleId === key);
         if (!app) {
             throw new Error (`${key} is not a valid bundleId`);
         }
+        console.log(app.hasExceeded(value));
+        console.log(app.restricted);
         if (app.hasExceeded(value) && app.restricted) {
             pd.push(app);
         }
     }
+
+    console.log(pd);
 
     return pd;
 }
