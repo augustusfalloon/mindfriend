@@ -11,6 +11,11 @@ const userSchema = new mongoose.Schema({
     passwordHash: { type: String, required: true },  // <-- Make sure this field exists
     restrictedApps: [{ type: mongoose.Schema.Types.ObjectId, ref: 'App' }],
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // list of userIDs (string references)
+    usage: {
+        type: Map,
+        of: Number,
+        default: {"facebook": 70, "instagram": 45, "youtube": 1000, "tiktok": 55, "twitter": 100, "snapchat": 223, "reddit": 1, "pinterest": 0}
+    }
 });
 
 userSchema.statics.createNewUser = async function(email, username , passwordHash) {
@@ -138,7 +143,9 @@ userSchema.methods.getExceeded = async function(usage) {
 
     console.log(usage);
 
-    for (const[key, value] of Object.entries(usage)) {
+    console.log("PLEAAAAASE");
+    const usageObj = Object.fromEntries(usage)
+    for (const[key, value] of Object.entries(usageObj)) {
         console.log(`${key}, ${value}`);
         console.log(this.restrictedApps);
         const app = this.restrictedApps.find(app => app.bundleId === key);

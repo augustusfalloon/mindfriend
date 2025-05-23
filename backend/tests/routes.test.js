@@ -73,9 +73,6 @@ describe('Basic route test', () => {
     const res = await request(baseURL)
         .post('/api/users/exceeded')
         .send( {
-            usage: {
-                "facebook": 70
-            },
             username: "test1",
         });
     

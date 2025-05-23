@@ -138,14 +138,14 @@ exports.addComment = async (req, res) => {
 
 exports.getExceeded = async (req, res) => {
     try {
-        const {usage, username} = req.body;
+        const {username} = req.body;
 
         const user = await User.findOne({ username });
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-        const exceeded = await user.getExceeded(usage);
+        const exceeded = await user.getExceeded(user.usage);
         console.log("DOOOOOO");
         console.log(exceeded);
         res.status(200).json(exceeded);
