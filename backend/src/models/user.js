@@ -70,6 +70,12 @@ userSchema.methods.updateRestriction = async function(bundleId, time) {
     const existingApp = this.restrictedApps.find(app => app.bundleId === bundleId);
     if (existingApp) {
       existingApp.dailyUsage = time;
+      if (time > 0) {
+        existingApp.restricted = true;
+      }
+      else {
+        existingApp.restricted = false;
+      }
         await existingApp.save();
     } else {
       throw new Error("No app found")
